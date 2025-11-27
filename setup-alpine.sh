@@ -103,7 +103,16 @@ cat >> /etc/ssh/sshd_config << 'EOF'
 
 # Fetch keys from GitHub
 AuthorizedKeysCommand /usr/local/bin/github-keys.sh
-AuthorizedKeysCommandUser nobody
+AuthorizedKeysCommandUser root
+EOF
+
+# Configure SSH (add after the existing SSH config section)
+echo "Configuring SSH for ProxyJump support..."
+cat >> /etc/ssh/sshd_config << 'EOF'
+
+# Enable forwarding for ProxyJump
+AllowTcpForwarding yes
+PermitOpen any
 EOF
 
 # Enable and restart SSH
