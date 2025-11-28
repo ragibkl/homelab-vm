@@ -8,3 +8,11 @@ services:
       - ./frps.toml:/etc/frp/frps.toml:ro
     restart: unless-stopped
     env_file: .env
+
+  haproxy:
+    image: haproxy:3.2-alpine
+    network_mode: host
+    user: root
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    restart: unless-stopped
