@@ -1,0 +1,25 @@
+serverAddr = "{{ .Envs.SERVER_ADDR }}"
+serverPort = 7001
+auth.method = "token"
+auth.token = "{{ .Envs.AUTH_TOKEN }}"
+
+[[proxies]]
+name = "tcp22"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 22
+remotePort = 2222
+
+[[proxies]]
+name = "tcp80"
+type = "tcp"
+localIP = "192.168.1.211"
+localPort = 80
+remotePort = 20080
+
+[[proxies]]
+name = "tcp443"
+type = "tcp"
+localIP = "192.168.1.211"
+localPort = 443
+remotePort = 20043

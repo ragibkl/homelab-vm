@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  frps:
+    image: snowdreamtech/frps:0.65
+    network_mode: host
+    volumes:
+      - ./frps.toml:/etc/frp/frps.toml:ro
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
