@@ -56,7 +56,7 @@ EOF
 
 # Configure SSH
 echo "Configuring SSH for ProxyJump support..."
-cp ./sshd_config_router.config /etc/ssh/sshd_config.d/01_router.config
+cp ./sshd_config_router.conf /etc/ssh/sshd_config.d/01_router.conf
 
 # Enable and restart SSH
 rc-update add sshd boot

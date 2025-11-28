@@ -37,16 +37,7 @@ cp ./github-keys.sh /usr/local/bin/github-keys.sh
 
 # Configure SSH
 echo "Configuring SSH..."
-cp ./sshd_config_common.config /etc/ssh/sshd_config.d/00_common.config
-
-# Configure SSH (add after the existing SSH config section)
-echo "Configuring SSH for ProxyJump support..."
-cat >> /etc/ssh/sshd_config << 'EOF'
-
-# Enable forwarding for ProxyJump
-AllowTcpForwarding yes
-PermitOpen any
-EOF
+cp ./sshd_config_common.conf /etc/ssh/sshd_config.d/00_common.conf
 
 # Enable and restart SSH
 rc-update add sshd boot
