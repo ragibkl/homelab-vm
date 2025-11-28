@@ -14,6 +14,7 @@ services:
       - NET_ADMIN
     volumes:
       - ./dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf:ro
+      - dnsmasq-misc:/var/lib/misc
     depends_on:
       - router
     restart: unless-stopped
@@ -27,6 +28,12 @@ services:
       - router
     restart: unless-stopped
     env_file: .env
+
+  leases:
+    build: ./leases
+    ports: 80:3000
+    volumes:
+      - dnsmasq-misc:/app/data
 
   # Optional: WireGuard VPN (uncomment when ready to test)
   # wireguard:
@@ -50,3 +57,6 @@ services:
   #   ports:
   #     - 51820:51820/udp
   #   restart: unless-stopped
+
+volumes:
+  dnsmasq-misc:
