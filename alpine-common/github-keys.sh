@@ -3,12 +3,12 @@
 # Usage: github-keys.sh <network>
 # Example: github-keys.sh vmbr1
 
-# Args
-NETWORK=${1:-vmbr0}
-
 # GitHub base URL and repo
 GITHUB_REPO="ragibkl/homelab-vm"
 GITHUB_BRANCH="master"
+
+# Auto-detect network from hostname prefix
+NETWORK=$(hostname | cut -d'-' -f1)
 
 USERS_URL="https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/ssh-users/${NETWORK}.txt"
 CACHE_FILE="/tmp/github-keys-${NETWORK}.txt"
