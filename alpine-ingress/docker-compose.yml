@@ -6,13 +6,12 @@ services:
       - MKNOD
       - SYS_MODULE
     image: kylemanna/openvpn
-    network_mode: host
+    ports:
+      - 1194:1194/udp
     restart: always
     volumes:
       - ./openvpn-data/conf:/etc/openvpn
       - /lib/modules:/lib/modules:ro
-    devices:
-      - /dev/net/tun
     privileged: true
 
   frpc:
