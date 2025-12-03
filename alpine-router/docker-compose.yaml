@@ -19,5 +19,11 @@ services:
       - router
     restart: unless-stopped
 
+  leases:
+    build: ./leases
+    network_mode: host
+    volumes:
+      - dnsmasq-misc:/app/data
+
 volumes:
   dnsmasq-misc:
