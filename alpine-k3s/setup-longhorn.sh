@@ -22,3 +22,6 @@ apk add open-iscsi nfs-utils
 # Enable iscsid service
 rc-update add iscsid default
 rc-service iscsid start
+
+# Enable Linux mount propagation
+mount --make-rshared /
