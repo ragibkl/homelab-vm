@@ -20,8 +20,8 @@ echo "Installing packages..."
 apk add docker docker-compose curl openssh git wget qemu-guest-agent chrony
 
 # Enable qemu-guest-agent
-rc-update add qemu-guest-agent default
-rc-service qemu-guest-agent start
+rc-update add qemu-guest-agent default || true
+rc-service qemu-guest-agent start || true
 
 # Enable and start Docker
 echo "Enabling Docker..."
