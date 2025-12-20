@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   frps:
     image: snowdreamtech/frps:0.65
