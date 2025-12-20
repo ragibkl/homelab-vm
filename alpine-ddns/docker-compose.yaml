@@ -1,0 +1,19 @@
+services:
+  ddns:
+    image: curlimages/curl:latest
+    container_name: ddns-updater
+    restart: unless-stopped
+    env_file: .env
+    command: >
+      sh -c '
+      while true; do
+        echo "$$(date): Updating DDNS for vmbr0.ingress.ragib.dev..."
+        if curl -f "$$UPDATE_URL"; then
+          echo "$$(date): Update successful"
+        else
+          echo "$$(date): Update failed"
+        fi
+        echo "$$(date): Sleeping $$UPDATE_INTERVAL seconds..."
+        sleep $$UPDATE_INTERVAL
+      done
+      '
