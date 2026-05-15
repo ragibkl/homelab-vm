@@ -26,6 +26,7 @@ services:
     network_mode: host
     volumes:
       - dnsmasq-misc:/app/data
+    restart: unless-stopped
 
 volumes:
   dnsmasq-misc:
