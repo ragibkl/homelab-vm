@@ -70,6 +70,22 @@ docker compose exec -T coder coder login http://localhost:7080 \
 
 Log in on the web, change the password, delete `~/coder-admin-password`.
 
+### GitHub login
+
+Uses our own GitHub OAuth app; Coder's built-in default app is disabled
+(Coder the company administers that one). Sign-ups are off, so GitHub login
+only works for accounts that already exist.
+
+1. https://github.com/settings/applications/new
+   - Homepage URL and Authorization callback URL:
+     `https://coder.vmbr1.ingress.ragib.dev`
+   - leave device flow off
+2. Put the client ID and a generated client secret in `.env`
+   (`CODER_OAUTH2_GITHUB_CLIENT_ID`, `CODER_OAUTH2_GITHUB_CLIENT_SECRET`),
+   then `docker compose up -d`.
+3. Switch the existing password account to GitHub from the web UI:
+   Account → Security.
+
 ### Template
 
 The CLI inside the container is logged in as the admin after the step above:

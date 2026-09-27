@@ -17,6 +17,14 @@ services:
       # Subdomain app URLs (*.coder.<domain>). Needs a wildcard cert; until
       # then apps are served path-based under the access URL.
       CODER_WILDCARD_ACCESS_URL: "${CODER_WILDCARD_ACCESS_URL:-}"
+      # GitHub login through our own OAuth app (not Coder's default app, which
+      # Coder the company administers). Existing accounts only: no sign-ups.
+      # Without a client ID set, only password login is offered.
+      CODER_OAUTH2_GITHUB_CLIENT_ID: "${CODER_OAUTH2_GITHUB_CLIENT_ID:-}"
+      CODER_OAUTH2_GITHUB_CLIENT_SECRET: "${CODER_OAUTH2_GITHUB_CLIENT_SECRET:-}"
+      CODER_OAUTH2_GITHUB_ALLOW_SIGNUPS: "false"
+      CODER_OAUTH2_GITHUB_ALLOW_EVERYONE: "true"
+      CODER_OAUTH2_GITHUB_DEFAULT_PROVIDER_ENABLE: "false"
     # The coder user in the image must be able to use the Docker socket.
     group_add:
       - "${DOCKER_GID}"
