@@ -175,6 +175,9 @@ module "code-server" {
 
   agent_id = coder_agent.main.id
   order    = 1
+
+  # Claude Code's VS Code extension, from Open VSX (code-server's registry).
+  extensions = ["anthropic.claude-code"]
 }
 
 # mise shims and ~/.local/bin (mise, claude) for every session, script and
@@ -189,6 +192,18 @@ resource "coder_env" "path" {
   agent_id = coder_agent.main.id
   name     = "PATH"
   value    = "/home/coder/.local/share/mise/shims:/home/coder/.local/bin:$PATH"
+}
+
+# Writes the user's Coder SSH key (Account -> SSH Keys; the same key in every
+# workspace) to ~/.ssh/git-commit-signing/coder and has git sign commits with
+# it. Add its public key to GitHub as both an authentication and a signing
+# key: git push already uses it (Coder sets GIT_SSH_COMMAND), and
+# ~/.ssh/config can point plain ssh at the same file for the VMs.
+module "git-commit-signing" {
+  count    = data.coder_workspace.me.start_count
+  source   = "registry.coder.com/coder/git-commit-signing/coder"
+  version  = "1.0.32"
+  agent_id = coder_agent.main.id
 }
 
 # "Open in VS Code" / "Open in Zed" buttons for the desktop editors.
