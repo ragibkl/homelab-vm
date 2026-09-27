@@ -96,13 +96,6 @@ resource "coder_agent" "main" {
     GIT_AUTHOR_EMAIL    = "${data.coder_workspace_owner.me.email}"
     GIT_COMMITTER_NAME  = coalesce(data.coder_workspace_owner.me.full_name, data.coder_workspace_owner.me.name)
     GIT_COMMITTER_EMAIL = "${data.coder_workspace_owner.me.email}"
-
-    # mise shims and ~/.local/bin (mise, claude) for every session, script and
-    # app, not just interactive shells: Ubuntu's ~/.bashrc returns early for
-    # non-interactive shells, so `mise activate` there never reaches commands
-    # run by Claude, `coder ssh`, or app buttons. The rest is the image's
-    # default PATH.
-    PATH = "/home/coder/.local/share/mise/shims:/home/coder/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
   }
 
   # The following metadata blocks are optional. They are used to display
@@ -182,6 +175,20 @@ module "code-server" {
 
   agent_id = coder_agent.main.id
   order    = 1
+}
+
+# mise shims and ~/.local/bin (mise, claude) for every session, script and
+# app, not just interactive shells: Ubuntu's ~/.bashrc returns early for
+# non-interactive shells, so `mise activate` there never reaches commands run
+# by Claude, `coder ssh`, or app buttons.
+#
+# Prepended to the real $PATH, which the agent expands at startup. Setting a
+# fixed PATH instead drops the agent's own directory, and with it the `coder`
+# binary that modules such as coder-login call.
+resource "coder_env" "path" {
+  agent_id = coder_agent.main.id
+  name     = "PATH"
+  value    = "/home/coder/.local/share/mise/shims:/home/coder/.local/bin:$PATH"
 }
 
 # "Open in VS Code" / "Open in Zed" buttons for the desktop editors.
