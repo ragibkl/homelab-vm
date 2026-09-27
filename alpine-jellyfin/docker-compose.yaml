@@ -1,0 +1,57 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin
+    restart: unless-stopped
+    ports:
+      - 8096:8096
+      - 8920:8920
+      - 1900:1900
+      - 7359:7359
+    volumes:
+      - jellyfin-config:/config
+      - jellyfin-cache:/cache
+      - /mnt/sdb1/shared/media:/media
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nfs:
+    image: itsthenetwork/nfs-server-alpine:12
+    restart: unless-stopped
+    privileged: true
+    environment:
+      - SHARED_DIRECTORY=/shared
+    volumes:
+      - /mnt/sdb1/shared:/shared
+    ports:
+      - 2049:2049
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  transmission:
+    image: lscr.io/linuxserver/transmission:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - transmission-config:/config
+      - /mnt/sdb1/shared:/downloads
+      - /mnt/sdb1/shared/watch:/watch
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  jellyfin-config:
+  jellyfin-cache:
+  transmission-config:

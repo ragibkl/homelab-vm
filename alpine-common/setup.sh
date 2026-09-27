@@ -17,7 +17,7 @@ apk upgrade
 
 # Install required packages
 echo "Installing packages..."
-apk add docker docker-compose curl openssh git wget qemu-guest-agent chrony
+apk add docker docker-compose curl openssh git wget qemu-guest-agent chrony cloud-utils-growpart e2fsprogs-extra
 
 # Enable qemu-guest-agent
 rc-update add qemu-guest-agent default || true

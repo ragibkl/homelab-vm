@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+set -e
+
+growpart /dev/sda 3
+resize2fs /dev/sda3
