@@ -14,8 +14,8 @@ services:
       # Workspace agents connect back to this URL, so it must be reachable
       # from inside workspace containers.
       CODER_ACCESS_URL: "${CODER_ACCESS_URL}"
-      # Subdomain app URLs (*.coder.<domain>). Needs a wildcard cert; until
-      # then apps are served path-based under the access URL.
+      # Subdomain app URLs (*.coder.<domain>); see README, "Wildcard app URLs".
+      # Unset, apps are served path-based under the access URL.
       CODER_WILDCARD_ACCESS_URL: "${CODER_WILDCARD_ACCESS_URL:-}"
       # GitHub login through our own OAuth app (not Coder's default app, which
       # Coder the company administers). Existing accounts only: no sign-ups.

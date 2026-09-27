@@ -107,6 +107,24 @@ Non-interactive `coder create` needs `--use-parameter-defaults`: the
 JetBrains module adds an IDE-selection parameter that otherwise waits for a
 prompt forever.
 
+## Wildcard app URLs
+
+`CODER_WILDCARD_ACCESS_URL=*.coder.vmbr1.ingress.ragib.dev` serves workspace
+apps and forwarded ports on their own subdomains, e.g. port 3000 of workspace
+`dev` (agent `main`) at `https://3000--main--dev--ragibkl.coder.vmbr1.ingress.ragib.dev`.
+
+- **DNS** (ClouDNS): explicit `coder.vmbr1.ingress.ragib.dev` and
+  `*.coder.vmbr1.ingress.ragib.dev` CNAMEs to `vmbr1.ingress.ragib.dev`.
+  The `*.vmbr1.ingress.ragib.dev` wildcard no longer covers them: the
+  `_acme-challenge.coder.vmbr1.ingress.ragib.dev` CNAME below makes
+  `coder.vmbr1.ingress.ragib.dev` exist in the zone, and a DNS wildcard
+  never answers for a name that exists or anything under it.
+- **Cert**: `coder-wildcard-ingress` in flux-deploy
+  (`services/local-proxy/coder-proxy.yaml`), issued by the `letsencrypt-dns`
+  ClusterIssuer via acme-dns (DNS-01), with
+  `_acme-challenge.coder.vmbr1.ingress.ragib.dev` CNAMEd to its acme-dns
+  registration.
+
 ## Upgrading
 
 - **Coder:** bump `CODER_VERSION` in `.env` (stable channel:
@@ -118,10 +136,6 @@ prompt forever.
 
 ## Not done yet
 
-- **Wildcard app URLs** (`CODER_WILDCARD_ACCESS_URL=*.coder.vmbr1.ingress.ragib.dev`).
-  DNS already resolves the wildcard; the cert needs cert-manager DNS-01
-  (the cluster issuer is HTTP-01 only). Until then, workspace apps are served
-  path-based under the access URL.
 - **Agents hairpin through the VPS.** Workspace agents reach Coder via the
   public URL (VPS → frp → cluster → VM) even though Coder is on the same VM.
   Fine for now; if latency matters, point agents at the VM directly.

@@ -26,15 +26,6 @@ Optional hardening, not required once the cache persists:
 - branch protection on `master`: anyone who can push `ssh-users/*.txt` gets
   root on every VM within an hour
 
-## Coder: wildcard app URLs
-
-`CODER_WILDCARD_ACCESS_URL=*.coder.vmbr1.ingress.ragib.dev`, to open workspace
-dev servers and ports on their own subdomains. DNS already resolves it (the
-`*.vmbr1.ingress.ragib.dev` wildcard covers nested names). Missing: a wildcard
-cert, which needs a DNS-01 solver in cert-manager — the cluster issuer is
-HTTP-01 only. Part of the planned move to acme-dns. Until then, apps are
-served path-based under the access URL. See `ubuntu-coder/README.md`.
-
 ## alpine-jellyfin: data disk
 
 Decommissioned 2026-09-27 (VM 231 powered off, start-at-boot off; see
