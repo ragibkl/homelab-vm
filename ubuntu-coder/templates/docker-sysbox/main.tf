@@ -66,6 +66,9 @@ resource "coder_agent" "main" {
       sudo apt-get update -qq
       sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq tmux >/dev/null
     fi
+    # Mouse scrolling in tmux; without it the browser terminal cannot scroll
+    # back. Written once; after that ~/.tmux.conf is yours.
+    [ -f ~/.tmux.conf ] || echo 'set -g mouse on' > ~/.tmux.conf
 
     # mise lives in the persistent home, and so does everything it installs,
     # so CLI tools survive restarts and image changes.
