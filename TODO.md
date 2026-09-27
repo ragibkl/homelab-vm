@@ -64,7 +64,7 @@ workspace home dirs.
 5. Coder: `ubuntu-coder/docker-compose.yaml` with `coder` + `postgres`.
    - mount `/var/run/docker.sock` and add the docker group GID so Coder can
      create workspace containers
-   - `CODER_ACCESS_URL=https://<coder domain>`
+   - `CODER_ACCESS_URL=https://coder.vmbr1.ingress.ragib.dev`
    - port 7080 (or 3000) exposed to vmbr1
 6. Workspace template: Coder's Docker template, with `runtime = "sysbox-runc"`
    on the `docker_container` resource. The workspace image needs systemd +
@@ -78,10 +78,13 @@ workspace home dirs.
 
 ### Decisions still open
 
-- **Domain** — e.g. `coder.bancuh.net` or `coder.vmbr1.ingress.ragib.dev`.
+- ~~Domain~~ — **`coder.vmbr1.ingress.ragib.dev`** (decided 2026-09-27).
+  `*.vmbr1.ingress.ragib.dev` is already a wildcard DNS record to the cluster,
+  so no DNS change is needed.
 - **Wildcard app URLs** (`CODER_WILDCARD_ACCESS_URL=*.coder.<domain>`) to open
-  workspace dev servers/ports in the browser. Needs a wildcard DNS record *and*
-  a wildcard cert — cert-manager in the cluster uses HTTP-01, which cannot
+  workspace dev servers/ports in the browser. DNS already resolves
+  `*.coder.vmbr1.ingress.ragib.dev` (the wildcard covers nested names); what is
+  missing is a wildcard cert — cert-manager in the cluster uses HTTP-01, which cannot
   issue wildcards, so this means adding a DNS-01 solver. Can skip at first.
 
 ### Gotchas
