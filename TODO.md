@@ -24,10 +24,11 @@ Sysbox has no Alpine package. Its supported hosts are Ubuntu/Debian/Flatcar.
 | | |
 |---|---|
 | Hostname | `vmbr1-ubuntu-coder` — `github-keys.sh` picks `ssh-users/<prefix>.txt` from the text before the first `-`, so the `vmbr1-` prefix matters |
-| IP | static on `10.15.1.0/24`; `.157` is free (old alpine-jellyfin) |
+| VMID | `1031` (created 2026-09-27) — follows the ID→IP pattern of the k3s VMs (`1021` → `.21`) |
+| IP | `10.15.1.31`, static via cloud-init (outside the dnsmasq DHCP range `.100–.200`) |
 | CPU | 4 vCPU |
 | RAM | **8 GB** to start (see below) |
-| Disk | 100 GB+, grow later with growpart/resize2fs |
+| Disk | 100 GB on `local-lvm`, grow later with growpart/resize2fs |
 
 **RAM budget, 8 GB:**
 
@@ -47,7 +48,13 @@ workspace home dirs.
 
 ### Setup steps
 
-1. Create the VM (Ubuntu Server 24.04, minimal). Enable qemu-guest-agent.
+1. ~~Create the VM~~ — **done 2026-09-27.** Built from the Ubuntu 24.04 cloud
+   image (`noble-server-cloudimg-amd64.img`, kept in `/root/cloudimg/` on the
+   Proxmox host) with cloud-init: user `ragib`, keys from
+   `github.com/ragibkl.keys`, static IP, `ciupgrade` on. Same hardware settings
+   as the k3s VMs (host CPU, VirtIO SCSI single, iothread, discard, NIC
+   firewall, start at boot), plus `balloon: 0` and a serial console
+   (cloud images expect one). qemu-guest-agent installed.
 2. Base setup, mirroring `alpine-common`:
    - packages: `curl git jq wget qemu-guest-agent chrony` (`jq` is required
      by the Sysbox installer)
