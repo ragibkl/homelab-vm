@@ -11,6 +11,30 @@ Self-hosted [Coder](https://coder.com/) on `vmbr1-ubuntu-coder` (Proxmox VM
   and Ingress in `flux-deploy`, `clusters/vmbr1-k3s/services/local-proxy/coder-proxy.yaml`.
   No oauth2-proxy there on purpose: agents and the CLI use Coder's own tokens.
 
+## VM
+
+| | |
+|---|---|
+| Hostname | `vmbr1-ubuntu-coder` — `github-keys.sh` picks `ssh-users/<prefix>.txt` from the text before the first `-`, so the `vmbr1-` prefix matters |
+| VMID | `1031`, following the ID→IP pattern of the k3s VMs (`1021` → `.21`) |
+| IP | `10.15.1.31`, static via cloud-init (outside the dnsmasq DHCP range `.100–.200`) |
+| CPU / RAM / disk | 4 vCPU (type `host`), 8 GB (no ballooning), 100 GB on `local-lvm` |
+
+**Why Ubuntu:** Sysbox has no Alpine package; it supports Ubuntu, Debian and
+Flatcar. Ubuntu 24.04 needs kernel 6.8+ and Sysbox 0.7.1+ (0.7.1 fixed Noble
+mount failures). Check https://github.com/nestybox/sysbox/blob/master/docs/distro-compat.md
+before changing either.
+
+**RAM:** base ~0.7 GB (Ubuntu, dockerd, Sysbox) plus ~0.5–0.8 GB for Coder and
+Postgres. Each Sysbox workspace adds ~0.2–0.3 GB (systemd, inner dockerd) and
+~0.5 GB (VS Code server), then whatever runs in it — rust-analyzer 1–3 GB,
+tsserver ~1 GB, builds spike beyond that. 8 GB is one heavy (Rust) or two light
+workspaces at a time; `docker compose` stacks inside workspaces want 12–16 GB.
+Watch `free -m` and grow the VM if it swaps.
+
+**Disk:** each workspace's inner Docker keeps its images and layers in its own
+`coder-<id>-docker` volume. That is what fills the disk, not home dirs.
+
 ## Setup
 
 On a VM built as in `../ubuntu-common/README.md`:
