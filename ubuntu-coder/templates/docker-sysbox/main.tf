@@ -79,7 +79,7 @@ resource "coder_agent" "main" {
     # is yours to edit, like on the laptop.
     if [ ! -f ~/.config/mise/config.toml ]; then
       mkdir -p ~/.config/mise
-      printf '[tools]\n%s\n' \
+      printf '%s\n' '[tools]' \
         'age = "latest"' 'gh = "latest"' 'helm = "latest"' 'kubectl = "latest"' \
         'kubectx = "latest"' 'kubens = "latest"' 'sops = "latest"' \
         > ~/.config/mise/config.toml
