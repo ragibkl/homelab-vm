@@ -7,7 +7,12 @@
 #   3. a second volume keeps the inner Docker's images and layers
 #      (/var/lib/docker) across workspace stop/start, like the home volume
 #
-# Everything else is upstream, to keep it easy to diff against a newer version.
+# And for day-to-day use: tmux and mise in the startup script, Claude Code
+# (module + a tmux-backed app button), VS Code Desktop / Zed buttons, and
+# coder-login. The JetBrains module is dropped.
+#
+# Everything only survives in /home/coder: the container is recreated on
+# every start.
 
 terraform {
   required_providers {
@@ -54,7 +59,32 @@ resource "coder_agent" "main" {
     # Sysbox: start the inner Docker daemon (codercom/enterprise-base ships docker-ce).
     sudo service docker start
 
-    # Add any commands that should be executed at workspace startup (e.g install requirements, start a program, etc) here
+    # tmux keeps Claude (and anything else) running after the browser tab or
+    # SSH session closes. The container is recreated on every start, so
+    # anything apt-installed has to be reinstalled here.
+    if ! command -v tmux >/dev/null; then
+      sudo apt-get update -qq
+      sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq tmux >/dev/null
+    fi
+
+    # mise lives in the persistent home, and so does everything it installs,
+    # so CLI tools survive restarts and image changes.
+    export PATH="$HOME/.local/bin:$PATH"
+    if ! command -v mise >/dev/null; then
+      curl -fsSL https://mise.run | sh
+    fi
+    grep -q 'mise activate bash' ~/.bashrc || echo 'eval "$(~/.local/bin/mise activate bash)"' >> ~/.bashrc
+
+    # Starting tool list, written once. After that ~/.config/mise/config.toml
+    # is yours to edit, like on the laptop.
+    if [ ! -f ~/.config/mise/config.toml ]; then
+      mkdir -p ~/.config/mise
+      printf '[tools]\n%s\n' \
+        'age = "latest"' 'gh = "latest"' 'helm = "latest"' 'kubectl = "latest"' \
+        'kubectx = "latest"' 'kubens = "latest"' 'sops = "latest"' \
+        > ~/.config/mise/config.toml
+    fi
+    mise install --yes
   EOT
 
   # These environment variables allow you to make Git commits right away after creating a
@@ -147,15 +177,53 @@ module "code-server" {
   order    = 1
 }
 
-# See https://registry.coder.com/modules/coder/jetbrains
-module "jetbrains" {
-  count      = data.coder_workspace.me.start_count
-  source     = "registry.coder.com/coder/jetbrains/coder"
-  version    = "~> 1.1"
-  agent_id   = coder_agent.main.id
-  agent_name = "main"
-  folder     = "/home/coder"
-  tooltip    = "You need to [install JetBrains Toolbox](https://coder.com/docs/user-guides/workspace-access/jetbrains/toolbox) to use this app."
+# "Open in VS Code" / "Open in Zed" buttons for the desktop editors.
+module "vscode" {
+  count    = data.coder_workspace.me.start_count
+  source   = "registry.coder.com/coder/vscode-desktop/coder"
+  version  = "1.3.0"
+  agent_id = coder_agent.main.id
+}
+
+module "zed" {
+  count    = data.coder_workspace.me.start_count
+  source   = "registry.coder.com/coder/zed/coder"
+  version  = "1.1.5"
+  agent_id = coder_agent.main.id
+}
+
+# Logs the coder CLI in inside the workspace, so it (and Claude) can manage
+# Coder from here, e.g. push this template.
+module "coder-login" {
+  count    = data.coder_workspace.me.start_count
+  source   = "registry.coder.com/coder/coder-login/coder"
+  version  = "1.1.1"
+  agent_id = coder_agent.main.id
+}
+
+# Installs the Claude Code CLI into ~/.local/bin (persistent home). No key is
+# passed in: log in once with `claude` inside the workspace; the login is kept
+# in ~/.claude.
+module "claude-code" {
+  count    = data.coder_workspace.me.start_count
+  source   = "registry.coder.com/coder/claude-code/coder"
+  version  = "5.5.1"
+  agent_id = coder_agent.main.id
+}
+
+# Opens Claude in a tmux session named "claude". Closing the tab leaves it
+# running; clicking again reattaches to the same session.
+resource "coder_app" "claude" {
+  count        = data.coder_workspace.me.start_count
+  agent_id     = coder_agent.main.id
+  slug         = "claude"
+  display_name = "Claude Code"
+  icon         = "/icon/claude.svg"
+  open_in      = "slim-window"
+  command      = <<-EOT
+    #!/bin/bash
+    exec tmux new-session -A -s claude -c /home/coder "bash -ic 'claude; exec bash -i'"
+  EOT
 }
 
 resource "docker_volume" "home_volume" {
