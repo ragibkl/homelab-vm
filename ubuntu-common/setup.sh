@@ -31,8 +31,9 @@ apt-get upgrade -y -qq
 echo "Installing packages..."
 apt-get install -y -qq ca-certificates curl git jq wget qemu-guest-agent cloud-guest-utils
 
-# Enable qemu-guest-agent
-systemctl enable --now qemu-guest-agent
+# Start qemu-guest-agent (on Ubuntu it is a static unit, started by udev when
+# the VM has the agent device, so there is nothing to enable)
+systemctl start qemu-guest-agent
 
 # Install Docker from Docker's apt repo
 echo "Installing Docker..."
