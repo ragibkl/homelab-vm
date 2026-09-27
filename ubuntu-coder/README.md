@@ -77,14 +77,21 @@ Uses our own GitHub OAuth app; Coder's built-in default app is disabled
 only works for accounts that already exist.
 
 1. https://github.com/settings/applications/new
-   - Homepage URL and Authorization callback URL:
-     `https://coder.vmbr1.ingress.ragib.dev`
+   - Homepage URL: `https://coder.vmbr1.ingress.ragib.dev`
+   - Authorization callback URL, exactly:
+     `https://coder.vmbr1.ingress.ragib.dev/api/v2/users/oauth2/github/callback`
+     (anything that isn't a prefix of this, on the same scheme and host,
+     fails at GitHub with "The redirect_uri is not associated with this
+     application")
    - leave device flow off
 2. Put the client ID and a generated client secret in `.env`
    (`CODER_OAUTH2_GITHUB_CLIENT_ID`, `CODER_OAUTH2_GITHUB_CLIENT_SECRET`),
    then `docker compose up -d`.
-3. Switch the existing password account to GitHub from the web UI:
-   Account → Security.
+3. Switch the existing password account to GitHub: `/settings/security` →
+   **Single Sign On** → GitHub, confirm with the current password. The
+   section only offers this while the account is still a password login.
+   Check with `docker compose exec coder coder users show <user> -o json`
+   (`login_type`). Done for `ragibkl` on 2026-09-27.
 
 ### Template
 
