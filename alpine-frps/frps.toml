@@ -1,3 +1,9 @@
 bindPort = 7000
 auth.method = "token"
 auth.token = "{{ .Envs.AUTH_TOKEN }}"
+
+# Listen for proxied ports on IPv6 too (dual-stack), not just 0.0.0.0.
+# acme-dns's 53/udp and 53/tcp (flux-deploy, acme.ragib.dev) are served by
+# frps directly, and vmbr1.ingress.ragib.dev, its nameserver, has an AAAA.
+# 80/443 don't need this: haproxy listens on both and forwards over IPv4.
+proxyBindAddr = "::"
