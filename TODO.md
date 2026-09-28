@@ -16,7 +16,7 @@ delete `/usr/local/bin/github-keys.sh`.
       keys come from cloud-init (static); add a `ragib` account entry in
       server-keys if those should follow GitHub too
 - [ ] vmbr2 VMs (not reachable from the Coder workspace)
-- [ ] vmbr1.ingress.ragib.dev (vmbr0-alpine-frps-vmbr1)
+- [x] vmbr1.ingress.ragib.dev (vmbr0-alpine-frps-vmbr1)
 - [ ] Then delete `ssh-users/`: unmigrated VMs still fetch it at login
 
 ## alpine-jellyfin: data disk
