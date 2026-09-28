@@ -17,9 +17,7 @@ Done 2026-09-28 (all running VMs; `sshd -T` shows no key command on each):
 - [x] vmbr2: k3s-server-1, k3s-worker-1/2, alpine-openvpn (reached with
       `ssh -J 10.15.1.1,10.15.0.196 10.15.2.x`)
 - [x] vmbr1.ingress.ragib.dev (vmbr0-alpine-frps-vmbr1)
-- [ ] vmbr2.ingress.ragib.dev: probably never had github-keys.sh (Coder key
-      refused). Install from a machine with access, with
-      `--name vmbr0-alpine-frps-vmbr2`
+- [x] vmbr2.ingress.ragib.dev (vmbr0-alpine-frps-vmbr2)
 - [ ] Stopped VMs still on github-keys.sh: vmbr0-alpine-ddns (100),
       vmbr1-alpine-jellyfin (231, to be deleted). Migrate or delete them,
       then delete `ssh-users/` (they fetch it at login).
