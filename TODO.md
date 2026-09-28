@@ -17,6 +17,7 @@ delete `/usr/local/bin/github-keys.sh`.
       server-keys if those should follow GitHub too
 - [ ] vmbr2 VMs (not reachable from the Coder workspace)
 - [x] vmbr1.ingress.ragib.dev (vmbr0-alpine-frps-vmbr1)
+- [ ] vmbr2.ingress.ragib.dev: probably never had github-keys.sh (Coder key refused). Install from a machine with access, with `--name vmbr0-alpine-frps-vmbr2`
 - [ ] Then delete `ssh-users/`: unmigrated VMs still fetch it at login
 
 ## alpine-jellyfin: data disk
