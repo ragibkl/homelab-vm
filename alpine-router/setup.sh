@@ -47,12 +47,12 @@ echo "Configuring SSH..."
 sed -i 's/#PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
 sed -i 's/#PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
 
-cat >> /etc/ssh/sshd_config << 'EOF'
-
-# Fetch keys from GitHub
-AuthorizedKeysCommand /usr/local/bin/github-keys.sh
-AuthorizedKeysCommandUser root
-EOF
+# SSH keys: keytree syncs root's authorized_keys hourly from
+# github.com/ragibkl/server-keys (keytree.yaml). The hostname must match an
+# entry there, e.g. vmbr1-*.
+echo "Installing keytree..."
+wget -qO- https://ragibkl.github.io/keytree/install |
+    sh -s https://raw.githubusercontent.com/ragibkl/server-keys/main/keytree.yaml
 
 # Configure SSH
 echo "Configuring SSH for ProxyJump support..."

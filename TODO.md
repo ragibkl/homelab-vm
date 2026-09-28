@@ -1,30 +1,21 @@
 # TODO
 
-## github-keys.sh: keep the key cache across reboots (parked 2026-09-27)
+## keytree rollout (started 2026-09-28)
 
-`github-keys.sh` caches the fetched keys in `/tmp/github-keys-<network>.txt`
-and falls back to that cache when GitHub can't be reached. On these VMs `/tmp`
-is tmpfs, so the cache is gone after every reboot — and root's
-`authorized_keys` is empty (checked on vmbr1-alpine-k3s-server-1), so there
-is no other key.
+SSH keys now come from [keytree](https://github.com/ragibkl/keytree) and
+[server-keys](https://github.com/ragibkl/server-keys), replacing
+`github-keys.sh` + `ssh-users/`. Per VM: run the installer, remove the
+`AuthorizedKeysCommand` lines from sshd config, reload, test a fresh login,
+delete `/usr/local/bin/github-keys.sh`.
 
-Lockout needs both at once: a VM that has just rebooted, and no way for it to
-reach GitHub at login (home internet down, the VM's DNS broken, GitHub down).
-That is exactly when you would want to SSH in to fix things; the Proxmox
-console is then the only way in.
-
-Fix: move `CACHE_FILE` to `/var/cache/github-keys/` (persistent, `0700`,
-root-owned). New laptop keys added to GitHub still show up within the hour,
-so the workflow does not change. Then push the updated script to the running
-VMs (`install -m 0755 github-keys.sh /usr/local/bin/`); the Ubuntu VM reuses
-the same file.
-
-Optional hardening, not required once the cache persists:
-
-- a break-glass key in `/root/.ssh/authorized_keys`
-- a dedicated unprivileged `AuthorizedKeysCommandUser` instead of root
-- branch protection on `master`: anyone who can push `ssh-users/*.txt` gets
-  root on every VM within an hour
+- [x] vmbr1-alpine-k3s-worker-2
+- [ ] vmbr1-alpine-k3s-worker-1
+- [ ] vmbr1-alpine-k3s-server-1
+- [ ] vmbr0-alpine-router-vmbr1 (ProxyJump to Proxmox: keep a session open)
+- [ ] vmbr1-ubuntu-coder: keytree only manages root. The `ragib` user's
+      keys come from cloud-init (static); add a `ragib` account entry in
+      server-keys if those should follow GitHub too
+- [ ] vmbr2 VMs (not reachable from the Coder workspace)
 
 ## alpine-jellyfin: data disk
 

@@ -3,9 +3,9 @@
 Ubuntu common setup. The Ubuntu counterpart of `alpine-common`, for VMs that
 need something Alpine cannot do (e.g. Sysbox for `ubuntu-coder`).
 
-Reuses `alpine-common/github-keys.sh`, `sshd_config_common.conf` and
-`daemon.json`, so SSH keys and Docker log rotation work the same as on the
-Alpine VMs.
+Reuses `alpine-common/sshd_config_common.conf` and `daemon.json`, and
+installs [keytree](https://github.com/ragibkl/keytree) like the Alpine VMs,
+so SSH keys and Docker log rotation work the same.
 
 ## Creating the VM
 
@@ -33,8 +33,9 @@ qm set $ID --ciuser ragib --sshkeys /root/cloudimg/ragibkl.keys \
 qm start $ID
 ```
 
-The hostname must start with the network (`vmbr1-...`): `github-keys.sh`
-picks `ssh-users/<prefix>.txt` from it.
+The hostname must match an entry in
+[server-keys](https://github.com/ragibkl/server-keys) (`vmbr1-*`): keytree
+uses it to decide who can log in.
 
 ## Setup
 

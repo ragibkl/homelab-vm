@@ -15,7 +15,7 @@ Self-hosted [Coder](https://coder.com/) on `vmbr1-ubuntu-coder` (Proxmox VM
 
 | | |
 |---|---|
-| Hostname | `vmbr1-ubuntu-coder` — `github-keys.sh` picks `ssh-users/<prefix>.txt` from the text before the first `-`, so the `vmbr1-` prefix matters |
+| Hostname | `vmbr1-ubuntu-coder` — keytree matches it against [server-keys](https://github.com/ragibkl/server-keys) (`vmbr1-*`), so the `vmbr1-` prefix matters |
 | VMID | `1031`, following the ID→IP pattern of the k3s VMs (`1021` → `.21`) |
 | IP | `10.15.1.31`, static via cloud-init (outside the dnsmasq DHCP range `.100–.200`) |
 | CPU / RAM / disk | 4 vCPU (type `host`), 8 GB (no ballooning), 100 GB on `local-lvm` |

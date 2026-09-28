@@ -31,9 +31,12 @@ cp ./daemon.json /etc/docker/daemon.json
 rc-update add docker boot
 rc-service docker start
 
-# Set up GitHub SSH keys with caching
-echo "Setting up GitHub SSH key fetching..."
-cp ./github-keys.sh /usr/local/bin/github-keys.sh
+# SSH keys: keytree syncs root's authorized_keys hourly from
+# github.com/ragibkl/server-keys (keytree.yaml). The hostname must match an
+# entry there, e.g. vmbr1-*.
+echo "Installing keytree..."
+wget -qO- https://ragibkl.github.io/keytree/install |
+    sh -s https://raw.githubusercontent.com/ragibkl/server-keys/main/keytree.yaml
 
 # Configure SSH
 echo "Configuring SSH..."

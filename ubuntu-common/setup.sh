@@ -62,9 +62,12 @@ if [ -n "$SUDO_USER" ] && [ "$SUDO_USER" != "root" ]; then
     echo "Added $SUDO_USER to the docker group (takes effect on next login)"
 fi
 
-# Set up GitHub SSH keys with caching
-echo "Setting up GitHub SSH key fetching..."
-install -m 0755 -o root -g root "$COMMON/github-keys.sh" /usr/local/bin/github-keys.sh
+# SSH keys: keytree syncs root's authorized_keys hourly from
+# github.com/ragibkl/server-keys (keytree.yaml). The hostname must match an
+# entry there, e.g. vmbr1-*.
+echo "Installing keytree..."
+wget -qO- https://ragibkl.github.io/keytree/install |
+    sh -s https://raw.githubusercontent.com/ragibkl/server-keys/main/keytree.yaml
 
 # Configure SSH
 echo "Configuring SSH..."
