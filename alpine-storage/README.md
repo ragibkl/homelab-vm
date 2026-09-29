@@ -26,16 +26,16 @@ VM is lost.
 
 ## Setup
 
-As root on the VM (Docker and docker-compose v1 are installed):
+As root on the VM (Docker with the Compose plugin):
 
 ```sh
 mkdir -p /root/garage /mnt/sdb1/garage/meta /mnt/sdb1/garage/data
 # copy docker-compose.yaml and garage.toml to /root/garage
 cd /root/garage
 cp sample.env .env    # fill in: openssl rand -hex 32 for each
-docker-compose up -d
+docker compose up -d
 
-G="docker-compose exec -T garage /garage"
+G="docker compose exec -T garage /garage"
 $G status                                     # note the node ID
 $G layout assign -z home -c 2.5T <node-id>    # capacity is only a weight on one node
 $G layout apply --version 1
@@ -59,12 +59,16 @@ Useful: `$G bucket list`, `$G key list`, `$G stats`, `$G worker list`.
 
 ## Upgrading Garage
 
-Bump the image tag in `docker-compose.yaml`, then `docker-compose pull &&
-docker-compose up -d`. Read the release notes first: major versions can
+Bump the image tag in `docker-compose.yaml`, then `docker compose pull &&
+docker compose up -d`. Read the release notes first: major versions can
 need a metadata migration.
 
 ## Notes
 
 - SSH: keytree; the hostname `vmbr1-alpine-storage` matches `vmbr1-*` in
   server-keys.
-- The VM runs Alpine 3.17 (end of life) with Docker 20.10.
+- Alpine 3.24 (upgraded in place from 3.17 on 2026-09-29, one release at a
+  time), Docker 29 with Compose v2. Starts at boot (`onboot: 1`).
+- `autoresize` shows as crashed in `rc-status`: it's a one-shot script from
+  the template (grow the root partition), which OpenRC reports that way once
+  it exits. Harmless.
