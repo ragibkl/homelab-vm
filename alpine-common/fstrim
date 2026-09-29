@@ -1,0 +1,7 @@
+#!/bin/sh
+# Weekly: tell the disks which blocks are free. Alpine ships no trim job, and
+# without it deleted data stays allocated in Proxmox's thin pool (and on a
+# passed-through SSD, slows writes to a crawl). Installed to
+# /etc/periodic/weekly by setup.sh; needs discard=on on the Proxmox disk.
+# -a needs the fstrim package (util-linux): busybox fstrim takes one mount point.
+fstrim -av 2>&1 | logger -t fstrim

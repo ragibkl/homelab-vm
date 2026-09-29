@@ -17,7 +17,7 @@ apk upgrade
 
 # Install required packages
 echo "Installing packages..."
-apk add docker docker-compose curl openssh git wget qemu-guest-agent chrony cloud-utils-growpart e2fsprogs-extra
+apk add docker docker-compose curl openssh git wget qemu-guest-agent chrony cloud-utils-growpart e2fsprogs-extra fstrim
 
 # Enable qemu-guest-agent
 rc-update add qemu-guest-agent default || true
@@ -45,6 +45,13 @@ cp ./sshd_config_common.conf /etc/ssh/sshd_config.d/00_common.conf
 # Enable and restart SSH
 rc-update add sshd boot
 rc-service sshd restart
+
+# Weekly TRIM (/etc/periodic/weekly, run by crond)
+echo "Installing weekly fstrim..."
+cp ./fstrim /etc/periodic/weekly/fstrim
+chmod +x /etc/periodic/weekly/fstrim
+rc-update add crond default
+rc-service crond start
 
 # Enable and restart chrony
 rc-update add chronyd boot

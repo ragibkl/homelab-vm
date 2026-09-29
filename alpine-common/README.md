@@ -24,6 +24,15 @@ Grows the root partition (`/dev/sda3`, the last one on the disk) and its
 filesystem to fill the disk. Fails with NOCHANGE if there is nothing to grow.
 
 
+## TRIM
+
+`setup.sh` installs the `fstrim` package (busybox `fstrim` has no `-a`) and
+`fstrim` into `/etc/periodic/weekly` (crond runs it
+Saturdays 03:00; log tag `fstrim`). Alpine has no trim job of its own, and
+without one, deleted data stays allocated in the Proxmox thin pool. The
+Proxmox disk needs `discard=on,ssd=1` for the TRIM to get through. On k3s
+nodes it also trims mounted Longhorn volumes.
+
 ## SSH keys (keytree)
 
 `setup.sh` installs [keytree](https://github.com/ragibkl/keytree), which
