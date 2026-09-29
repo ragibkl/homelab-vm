@@ -1,0 +1,20 @@
+# Bancuh base image: /etc/systemd/system/root-keys-only.service (enabled).
+# On a rebuild, DigitalOcean writes a new root password into /etc/shadow and
+# marks it must-change when the droplet has no DigitalOcean SSH keys, which
+# blocks even SSH key logins ("Password change required"). Root uses SSH keys
+# only, so at every boot, before sshd starts: make the password unusable and
+# clear the forced change. Reset it from the DigitalOcean panel if the web
+# console is ever needed.
+[Unit]
+Description=Root: SSH keys only, no password
+DefaultDependencies=no
+After=local-fs.target
+Before=ssh.service ssh.socket cloud-init.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/usermod -p * root
+ExecStart=/bin/sh -c "chage -d $(date +%%Y-%%m-%%d) -M -1 root"
+
+[Install]
+WantedBy=multi-user.target
