@@ -18,13 +18,14 @@ Done 2026-09-28 (all running VMs; `sshd -T` shows no key command on each):
       `ssh -J 10.15.1.1,10.15.0.196 10.15.2.x`)
 - [x] vmbr1.ingress.ragib.dev (vmbr0-alpine-frps-vmbr1)
 - [x] vmbr2.ingress.ragib.dev (vmbr0-alpine-frps-vmbr2)
-- [ ] Stopped VM still on github-keys.sh: vmbr0-alpine-ddns (100). Migrate
-      or delete it, then delete `ssh-users/` (it fetches it at login).
+- [ ] Stopped VM still on github-keys.sh: vmbr0-alpine-ddns (100), probably
+      no longer needed. Delete it (or migrate it), then delete `ssh-users/`
+      (it fetches it at login).
 - [x] vmbr1-alpine-jellyfin (231): keytree 2026-09-29; it had no key
       command, only a static authorized_keys. Renamed vmbr1-alpine-storage
       (Garage), see alpine-storage/.
-- [ ] Each migrated VM has `/root/00_common.conf.bak` (the old sshd
-      snippet); delete once settled.
+- [x] `/root/*.bak` sshd backups removed from the migrated VMs (2026-09-29,
+      during the keytree v0.2.0 upgrade).
 
 On vmbr1-ubuntu-coder, keytree only manages root. The `ragib` user's keys
 come from cloud-init (static), and root's cloud-init lines force "Please
