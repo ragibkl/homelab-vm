@@ -67,7 +67,8 @@ once stalled long enough for ext4 to go read-only. With TRIM passed through
 and one `fstrim` (2.9 TB + 0.7 TB released), it writes at 300-500 MB/s.
 
 - Proxmox: `scsi2: /dev/disk/by-id/ata-TS4TSSD230S_H690001077,discard=on,ssd=1`
-- VM: `/etc/periodic/weekly/fstrim` runs `fstrim -a` (log tag `fstrim`).
+  (and `discard=on,ssd=1` on the boot disk `scsi0` too)
+- VM: `/etc/periodic/weekly/fstrim` from alpine-common (log tag `fstrim`).
 - It still runs hot (72-75 °C under load): check its airflow.
 
 ## Upgrading Garage

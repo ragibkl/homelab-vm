@@ -11,8 +11,8 @@ delete `/usr/local/bin/github-keys.sh`.
 Done 2026-09-28 (all running VMs; `sshd -T` shows no key command on each):
 
 - [x] vmbr1: router-vmbr1, k3s-server-1, k3s-worker-1/2, ubuntu-coder,
-      alpine-ingress (openvpn VM, 10.15.1.254)
-- [x] vmbr0: alpine-ingress (openvpn VM, 10.15.0.254), router-vmbr2
+      vmbr1-alpine-openvpn (10.15.1.254)
+- [x] vmbr0: vmbr0-alpine-openvpn (10.15.0.254), router-vmbr2
       (10.15.0.196; also had the lines in its main `sshd_config`)
 - [x] vmbr2: k3s-server-1, k3s-worker-1/2, alpine-openvpn (reached with
       `ssh -J 10.15.1.1,10.15.0.196 10.15.2.x`)

@@ -1,8 +1,0 @@
-services:
-  frpc:
-    image: snowdreamtech/frpc:0.65
-    network_mode: host
-    volumes:
-      - ./frpc/frpc.toml:/etc/frp/frpc.toml:ro
-    restart: unless-stopped
-    env_file: .env
