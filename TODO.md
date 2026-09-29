@@ -20,9 +20,9 @@ Done 2026-09-28 (all running VMs; `sshd -T` shows no key command on each):
 - [x] vmbr2.ingress.ragib.dev (vmbr0-alpine-frps-vmbr2)
 - [ ] Stopped VM still on github-keys.sh: vmbr0-alpine-ddns (100). Migrate
       or delete it, then delete `ssh-users/` (it fetches it at login).
-- [x] vmbr1-alpine-jellyfin (231): keytree 2026-09-29 (`--name
-      vmbr1-alpine-jellyfin`); it had no key command, only a static
-      authorized_keys. Now the Garage VM, see alpine-garage/.
+- [x] vmbr1-alpine-jellyfin (231): keytree 2026-09-29; it had no key
+      command, only a static authorized_keys. Renamed vmbr1-alpine-storage
+      (Garage), see alpine-storage/.
 - [ ] Each migrated VM has `/root/00_common.conf.bak` (the old sshd
       snippet); delete once settled.
 

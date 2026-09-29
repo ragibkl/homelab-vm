@@ -5,6 +5,6 @@
 server and Transmission, all serving `/mnt/sdb1/shared` on a separate 3.7 TB
 data disk.
 
-The VM itself now runs Garage (see ../alpine-garage), with 1 GB RAM; the
+The VM is now `vmbr1-alpine-storage` and runs Garage (see ../alpine-storage), with 1 GB RAM; the
 media on the data disk is untouched and these apps are not run. The cluster proxies for jellyfin.bancuh.net and
 transmission.bancuh.net were removed from flux-deploy the same day.

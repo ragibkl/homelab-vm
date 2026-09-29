@@ -1,9 +1,9 @@
-# alpine-garage
+# alpine-storage
 
 Self-hosted S3 ([Garage](https://garagehq.deuxfleurs.fr/)) for the homelab,
-on Proxmox VM 231 (`10.15.1.157`, vmbr1). The VM is still named
-`vmbr1-alpine-jellyfin`: it reuses that VM's 3.7 TB SSD (passed through as
-`/dev/sdb`, mounted at `/mnt/sdb1`). The old media in `/mnt/sdb1/shared`
+on `vmbr1-alpine-storage` (Proxmox VM 231, `10.15.1.157`, vmbr1). This was
+`vmbr1-alpine-jellyfin` until 2026-09-29; it keeps that VM's 3.7 TB SSD
+(passed through as `/dev/sdb`, mounted at `/mnt/sdb1`). The old media in `/mnt/sdb1/shared`
 stays where it is; Jellyfin and Transmission are not run.
 
 ```
@@ -65,6 +65,6 @@ need a metadata migration.
 
 ## Notes
 
-- SSH: keytree, installed with `--name vmbr1-alpine-jellyfin` (the hostname
-  is `alpine-jellyfin`, which doesn't match `vmbr1-*` in server-keys).
+- SSH: keytree; the hostname `vmbr1-alpine-storage` matches `vmbr1-*` in
+  server-keys.
 - The VM runs Alpine 3.17 (end of life) with Docker 20.10.
