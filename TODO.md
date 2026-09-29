@@ -1,6 +1,6 @@
 # TODO
 
-## keytree rollout (started 2026-09-28)
+## keytree rollout (done 2026-09-29)
 
 SSH keys now come from [keytree](https://github.com/ragibkl/keytree) and
 [server-keys](https://github.com/ragibkl/server-keys), replacing
@@ -18,9 +18,9 @@ Done 2026-09-28 (all running VMs; `sshd -T` shows no key command on each):
       `ssh -J 10.15.1.1,10.15.0.196 10.15.2.x`)
 - [x] vmbr1.ingress.ragib.dev (vmbr0-alpine-frps-vmbr1)
 - [x] vmbr2.ingress.ragib.dev (vmbr0-alpine-frps-vmbr2)
-- [ ] Stopped VM still on github-keys.sh: vmbr0-alpine-ddns (100), probably
-      no longer needed. Delete it (or migrate it), then delete `ssh-users/`
-      (it fetches it at login).
+- [x] vmbr0-alpine-ddns (100): deleted 2026-09-29 (no longer needed).
+- [x] `ssh-users/` deleted 2026-09-29: no VM runs github-keys.sh any more
+      (all 13 running VMs checked with `sshd -T`; no stopped VMs left).
 - [x] vmbr1-alpine-jellyfin (231): keytree 2026-09-29; it had no key
       command, only a static authorized_keys. Renamed vmbr1-alpine-storage
       (Garage), see alpine-storage/.
