@@ -8,7 +8,7 @@ stays where it is; Jellyfin and Transmission are not run.
 
 ```
 /mnt/sdb1/
-├── shared/          old Jellyfin/Transmission media (untouched)
+├── shared/media/    movies, tv-shows (anime deleted 2026-09-29)
 └── garage/
     ├── meta/        Garage metadata (LMDB) + 6-hourly snapshots
     └── data/        object data
@@ -56,6 +56,19 @@ $G bucket info nextcloud
 Put the key into the app's SOPS secret in flux-deploy; don't keep it here.
 
 Useful: `$G bucket list`, `$G key list`, `$G stats`, `$G worker list`.
+
+## The SSD needs TRIM
+
+The data disk is a Transcend TS4TSSD230S passed through from Proxmox. Until
+2026-09-29 its Proxmox entry had no `discard=on`, so QEMU dropped the guest's
+TRIM: after years of downloads the drive treated ~3 TB of deleted data as
+live and wrote at 1-2 MB/s (17 s per 1 MB write), running at 70-78 °C, and
+once stalled long enough for ext4 to go read-only. With TRIM passed through
+and one `fstrim` (2.9 TB + 0.7 TB released), it writes at 300-500 MB/s.
+
+- Proxmox: `scsi2: /dev/disk/by-id/ata-TS4TSSD230S_H690001077,discard=on,ssd=1`
+- VM: `/etc/periodic/weekly/fstrim` runs `fstrim -a` (log tag `fstrim`).
+- It still runs hot (72-75 °C under load): check its airflow.
 
 ## Upgrading Garage
 
