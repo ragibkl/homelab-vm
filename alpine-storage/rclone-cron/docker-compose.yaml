@@ -1,0 +1,19 @@
+services:
+  rclone-cron:
+    image: rclone/rclone:1.75.1
+    restart: unless-stopped
+    # Garage listens on the host (127.0.0.1:3900).
+    network_mode: host
+    entrypoint: ["crond", "-f", "-l", "6"]
+    environment:
+      TZ: Asia/Kuala_Lumpur
+    env_file: .env
+    volumes:
+      - ./crontab:/etc/crontabs/root:ro
+      - ./offsite-sync.sh:/usr/local/bin/offsite-sync.sh:ro
+      - ./initial-copy.sh:/usr/local/bin/initial-copy.sh:ro
+      - ./state:/state
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"

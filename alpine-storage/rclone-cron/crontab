@@ -1,0 +1,11 @@
+# Garage -> Wasabi offsite copy of each bucket (Malaysia time).
+#
+# DISABLED until Nextcloud is cut over to Garage: until then Wasabi is
+# Nextcloud's live storage, and a Garage -> Wasabi sync would delete from
+# it everything Garage doesn't have yet. Uncomment both lines at cutover.
+#
+# Hourly: upload new and changed objects, never delete.
+#15 * * * * /usr/local/bin/offsite-sync.sh copy
+# Nightly: also delete from Wasabi what was deleted in Garage (versioning
+# on the Wasabi bucket keeps the deleted versions).
+#0 4 * * * /usr/local/bin/offsite-sync.sh sync

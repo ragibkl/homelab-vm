@@ -14,24 +14,35 @@ stays where it is; Jellyfin and Transmission are not run.
     └── data/        object data
 ```
 
-Single node, `replication_factor = 1`: Garage keeps one copy. Durability is
-meant to come from an offsite sync of each bucket (planned: nightly rclone to
-a versioned Wasabi bucket), which also serves as a fallback endpoint if this
-VM is lost.
+Single node, `replication_factor = 1`: Garage keeps one copy. Durability
+comes from the offsite copy of each bucket to Wasabi (`rclone-cron/`), which
+is also the fallback endpoint if this VM is lost.
 
 | Port | What | Who uses it |
 | ---- | ---- | ----------- |
 | 3900 | S3 API, region `garage`, path-style | apps on vmbr1 (`http://10.15.1.157:3900`) |
 | 3903 | admin API: `/health` (open), `/metrics` (metrics token) | Gatus |
 
-## Setup
+## Layout
 
-As root on the VM (Docker with the Compose plugin):
+Two independent compose projects, both under `/root/storage` on the VM:
+
+```
+/root/storage/
+├── garage/        Garage itself (docker-compose.yaml, garage.toml, .env)
+└── rclone-cron/   rclone + crond: offsite copy to Wasabi
+                   (docker-compose.yaml, crontab, offsite-sync.sh,
+                    initial-copy.sh, .env, state/)
+```
+
+Secrets are only in each folder's `.env` on the VM (see `sample.env`).
+
+## Setup: garage
 
 ```sh
-mkdir -p /root/garage /mnt/sdb1/garage/meta /mnt/sdb1/garage/data
-# copy docker-compose.yaml and garage.toml to /root/garage
-cd /root/garage
+mkdir -p /root/storage/garage /mnt/sdb1/garage/meta /mnt/sdb1/garage/data
+# copy garage/ to /root/storage/garage
+cd /root/storage/garage
 cp sample.env .env    # fill in: openssl rand -hex 32 for each
 docker compose up -d
 
@@ -41,21 +52,50 @@ $G layout assign -z home -c 2.5T <node-id>    # capacity is only a weight on one
 $G layout apply --version 1
 ```
 
-## One bucket and one key per app
+## Buckets and keys
 
-Each app gets its own bucket and its own key, allowed on that bucket only, so
-a leaked key exposes one app's data:
+One bucket per app, and one key per job, allowed on that bucket only (a
+leaked key exposes one app). Permissions are read / write / owner per
+bucket; no app key gets owner or `--create-bucket`. Garage keeps secrets in
+its metadata (`$G key info <key> --show-secret`), and `$G key import` can
+recreate a key with the same ID and secret after a rebuild.
+
+| Bucket | Key | Permissions | Secret lives in |
+| ------ | --- | ----------- | --------------- |
+| `cloud-bancuh-s3` (Nextcloud) | `nextcloud` | read, write | flux-deploy `nextcloud-secrets` (SOPS): `GARAGE_S3_KEY/SECRET` |
+| `cloud-bancuh-s3` | `offsite-sync` | read | `rclone-cron/.env` |
+
+The bucket name must stay `cloud-bancuh-s3`: Nextcloud's storage id
+(`object::store:amazon::cloud-bancuh-s3`) contains it.
 
 ```sh
-$G bucket create nextcloud
-$G key create nextcloud                # prints the key ID and secret once
-$G bucket allow --read --write nextcloud --key nextcloud
-$G bucket info nextcloud
+$G bucket create <bucket>
+$G key create <name>                  # prints the key ID and secret
+$G bucket allow --read --write <bucket> --key <name>
+$G bucket info <bucket>
 ```
 
-Put the key into the app's SOPS secret in flux-deploy; don't keep it here.
+## Offsite copy: rclone-cron
 
-Useful: `$G bucket list`, `$G key list`, `$G stats`, `$G worker list`.
+`offsite-sync.sh copy|sync` copies each bucket in its `BUCKETS` list from
+Garage to Wasabi (read-only Garage key; the Wasabi key is the bucket-scoped
+IAM user). `crontab` runs `copy` hourly (upload new and changed objects,
+never delete) and `sync` nightly at 04:00 (also mirror deletions; the Wasabi
+bucket has versioning, so deleted versions stay recoverable, and
+`--max-delete 2000` stops a sync from an accidentally empty source). Each
+success writes the time to `state/last-copy` / `state/last-sync`.
+
+The cron lines stay commented out until the app is cut over to Garage:
+before that, Wasabi is the app's live storage.
+
+Moving an existing bucket in from Wasabi (before cutover), with a temporary
+Garage key with write access in `RCLONE_CONFIG_GARAGEW_*`:
+
+```sh
+$G key create initial-copy --expires-in 2d
+$G bucket allow --read --write <bucket> --key initial-copy
+docker compose exec -T rclone-cron initial-copy.sh <bucket> 30M   # 30 MiB/s ~ 250 Mbit/s
+```
 
 ## The SSD needs TRIM
 

@@ -1,1 +1,2 @@
 .env
+alpine-storage/rclone-cron/state/
