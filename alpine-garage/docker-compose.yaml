@@ -1,0 +1,19 @@
+services:
+  garage:
+    image: dxflrs/garage:v2.4.1
+    restart: unless-stopped
+    environment:
+      GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET}
+      GARAGE_ADMIN_TOKEN: ${GARAGE_ADMIN_TOKEN}
+      GARAGE_METRICS_TOKEN: ${GARAGE_METRICS_TOKEN}
+    ports:
+      - 3900:3900 # S3 API
+      - 3903:3903 # admin API: /health, /metrics
+    volumes:
+      - ./garage.toml:/etc/garage.toml:ro
+      - /mnt/sdb1/garage/meta:/var/lib/garage/meta
+      - /mnt/sdb1/garage/data:/var/lib/garage/data
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"

@@ -1,0 +1,27 @@
+# Single-node Garage. Secrets (rpc_secret, admin/metrics tokens) come from the
+# GARAGE_* variables in .env, not this file.
+
+# Metadata and data both live on the data disk, so the whole store is on one
+# disk and the VM's boot disk holds nothing that can't be rebuilt.
+metadata_dir = "/var/lib/garage/meta"
+data_dir = "/var/lib/garage/data"
+db_engine = "lmdb"
+# Snapshots of the metadata DB (in meta/snapshots), to recover from LMDB
+# corruption after an unclean shutdown.
+metadata_auto_snapshot_interval = "6h"
+
+# One node, so one copy. Durability comes from the offsite sync, not Garage.
+replication_factor = 1
+# Mostly photos (incompressible); cheap zstd still helps documents.
+compression_level = 1
+
+# RPC is for talking to other nodes; there are none.
+rpc_bind_addr = "127.0.0.1:3901"
+rpc_public_addr = "127.0.0.1:3901"
+
+[s3_api]
+s3_region = "garage"
+api_bind_addr = "[::]:3900"
+
+[admin]
+api_bind_addr = "[::]:3903"
