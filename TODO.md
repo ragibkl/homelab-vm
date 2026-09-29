@@ -27,9 +27,10 @@ Done 2026-09-28 (all running VMs; `sshd -T` shows no key command on each):
 - [x] `/root/*.bak` sshd backups removed from the migrated VMs (2026-09-29,
       during the keytree v0.2.0 upgrade).
 
-On vmbr1-ubuntu-coder, keytree only manages root. The `ragib` user's keys
-come from cloud-init (static), and root's cloud-init lines force "Please
-login as ragib" for the keys on them; both left as they were.
+On vmbr1-ubuntu-coder, keytree manages both root and the `ragib` login user
+(server-keys entry `vmbr1-ubuntu-coder`). The cloud-init keys outside the
+blocks are left alone; root's cloud-init lines force "Please login as ragib"
+for the keys on them.
 
 ## alpine-jellyfin: data disk
 
