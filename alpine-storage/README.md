@@ -85,6 +85,12 @@ bucket has versioning, so deleted versions stay recoverable, and
 `--max-delete 2000` stops a sync from an accidentally empty source). Each
 success writes the time to `state/last-copy` / `state/last-sync`.
 
+Monitoring: after each run the script pushes the result to the vmbr1 Gatus
+(external endpoints `storage_offsite-copy` / `storage_offsite-sync`, via the
+`gatus-push` NodePort 30808, allowed only from this VM, bearer token in
+`.env`). Gatus alerts on Telegram when a run fails, or when no push arrives
+within 2 h (copy) / 26 h (sync). It also checks Garage's `/health`.
+
 Enabled 2026-09-30, when Nextcloud moved to Garage. Before cutting over
 another app, keep its bucket out of `BUCKETS` in `offsite-sync.sh`: until
 then Wasabi is its live storage, and a sync would delete from it what
