@@ -103,6 +103,14 @@ docker compose exec -T coder coder templates push docker-sysbox \
   --directory /tmp/docker-sysbox --yes
 ```
 
+The startup script ends by running any executables in
+`~/.config/coder/startup.d/` (persistent home), so each user can start their
+own things on workspace start without changing the template. Hooks must
+background anything long-running and redirect its output. Example: the
+vmbr2 kubectl tunnel, a loop around `ssh -N vmbr2-socks` (a `~/.ssh/config`
+entry with `DynamicForward 127.0.0.1:1080` through both routers), started by
+`~/.config/coder/startup.d/vmbr2-tunnel`.
+
 Non-interactive `coder create` needs `--use-parameter-defaults`: the
 JetBrains module adds an IDE-selection parameter that otherwise waits for a
 prompt forever.

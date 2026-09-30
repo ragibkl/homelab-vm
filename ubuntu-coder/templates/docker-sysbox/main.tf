@@ -88,6 +88,14 @@ resource "coder_agent" "main" {
         > ~/.config/mise/config.toml
     fi
     mise install --yes
+
+    # Per-user startup hooks: executables in ~/.config/coder/startup.d run on
+    # every start (e.g. a tunnel only one user's keys can open). Hooks must
+    # background anything long-running and redirect its output. No hooks,
+    # nothing runs.
+    for hook in ~/.config/coder/startup.d/*; do
+      [ -x "$hook" ] && "$hook" || true
+    done
   EOT
 
   # These environment variables allow you to make Git commits right away after creating a
