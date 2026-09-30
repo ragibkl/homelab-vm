@@ -85,8 +85,10 @@ bucket has versioning, so deleted versions stay recoverable, and
 `--max-delete 2000` stops a sync from an accidentally empty source). Each
 success writes the time to `state/last-copy` / `state/last-sync`.
 
-The cron lines stay commented out until the app is cut over to Garage:
-before that, Wasabi is the app's live storage.
+Enabled 2026-09-30, when Nextcloud moved to Garage. Before cutting over
+another app, keep its bucket out of `BUCKETS` in `offsite-sync.sh`: until
+then Wasabi is its live storage, and a sync would delete from it what
+Garage doesn't have yet.
 
 Moving an existing bucket in from Wasabi (before cutover), with a temporary
 Garage key with write access in `RCLONE_CONFIG_GARAGEW_*`:
