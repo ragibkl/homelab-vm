@@ -105,6 +105,48 @@ $G bucket allow --read --write <bucket> --key initial-copy
 docker compose exec -T rclone-cron initial-copy.sh <bucket> 30M   # 30 MiB/s ~ 250 Mbit/s
 ```
 
+## Disaster recovery
+
+Drilled 2026-09-30 (throwaway Garage on other ports: key import, 300-object
+restore from Wasabi checked with `rclone check`, a deleted object found in
+Wasabi's versions).
+
+**Right away, if this VM or its SSD is gone:** point Nextcloud at Wasabi.
+In flux-deploy `services/nextcloud/nextcloud.yaml`, set
+`OBJECTSTORE_S3_HOST=s3.ap-southeast-1.wasabisys.com`, `PORT=443`,
+`SSL=true`, `REGION=ap-southeast-1`, and the key/secret refs back to
+`OBJECTSTORE_S3_KEY/SECRET` (the Wasabi IAM user `nextcloud`). Wasabi is
+at most an hour behind (hourly copy); uploads since the last copy are lost.
+
+**Rebuilding Garage:**
+
+1. New disk or VM, then Setup above (a fresh `meta/`).
+2. Recreate each app's key with its **old ID and secret**, from where the
+   app keeps them (for Nextcloud: `GARAGE_S3_KEY/SECRET` in
+   `nextcloud-secrets`), so the app's config doesn't change:
+   `$G key import --yes <id> <secret> -n nextcloud`. This only works on a
+   fresh Garage: one that has seen the ID, even deleted, refuses it.
+3. `$G bucket create cloud-bancuh-s3`, allow the key, and a new
+   `offsite-sync` key for `rclone-cron/.env`.
+4. Copy back from Wasabi with a temporary write key (`initial-copy.sh`,
+   about an hour for ~200 GB at full speed; drop the bandwidth cap).
+   Keep rclone-cron's jobs **commented out** until the copy is complete:
+   a Garage -> Wasabi sync from a half-filled Garage would delete from
+   Wasabi (`--max-delete 2000` limits the damage, versioning keeps it
+   recoverable).
+5. Check with `rclone size` / `rclone check` on both sides, switch
+   Nextcloud back to Garage, re-enable the jobs.
+
+**Recovering a deleted or overwritten object from Wasabi** (versioning;
+needs the Wasabi admin user, as the bucket-scoped keys can't touch
+versions): `aws s3api list-object-versions --bucket cloud-bancuh-s3 --prefix
+urn:oid:<fileid>`, then delete the delete marker (`delete-object --key ...
+--version-id <marker>`) or copy the old version back. The Wasabi IAM
+endpoint (`iam.wasabisys.com`) needs region `us-east-1`.
+
+Nextcloud's database is not here: it's on Longhorn with nightly backups to
+Wasabi (the cluster's Longhorn backup target).
+
 ## The SSD needs TRIM
 
 The data disk is a Transcend TS4TSSD230S passed through from Proxmox. Until
