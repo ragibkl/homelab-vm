@@ -8,8 +8,8 @@
 #      (/var/lib/docker) across workspace stop/start, like the home volume
 #
 # And for day-to-day use: tmux and mise in the startup script, Claude Code
-# (module + a tmux-backed app button), VS Code Desktop / Zed buttons, and
-# coder-login. The JetBrains module is dropped.
+# (module + a tmux-backed app button), a Zed button (VS Code Desktop is
+# built in), and coder-login. The JetBrains module is dropped.
 #
 # Everything only survives in /home/coder: the container is recreated on
 # every start.
@@ -217,14 +217,8 @@ module "git-commit-signing" {
   agent_id = coder_agent.main.id
 }
 
-# "Open in VS Code" / "Open in Zed" buttons for the desktop editors.
-module "vscode" {
-  count    = data.coder_workspace.me.start_count
-  source   = "registry.coder.com/coder/vscode-desktop/coder"
-  version  = "1.3.0"
-  agent_id = coder_agent.main.id
-}
-
+# "Open in Zed" button. VS Code Desktop needs no module: the agent shows its
+# own built-in button by default, and the module only added a duplicate.
 module "zed" {
   count    = data.coder_workspace.me.start_count
   source   = "registry.coder.com/coder/zed/coder"
