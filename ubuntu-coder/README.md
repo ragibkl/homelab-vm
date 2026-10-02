@@ -32,6 +32,12 @@ tsserver ~1 GB, builds spike beyond that. 8 GB is one heavy (Rust) or two light
 workspaces at a time; `docker compose` stacks inside workspaces want 12–16 GB.
 Watch `free -m` and grow the VM if it swaps.
 
+**Swap:** 4 GB at `/swapfile`, swappiness 10 (`../ubuntu-common/setup-swap.sh`),
+added 2026-10-02 after two global OOM kills in one day: the workspace container
+had no memory limit and the VM had no swap, so a memory spike inside the
+workspace (several chrome-devtools-mcp copies plus Chromium) took the whole VM
+down to the OOM killer.
+
 **Disk:** each workspace's inner Docker keeps its images and layers in its own
 `coder-<id>-docker` volume. That is what fills the disk, not home dirs.
 
@@ -43,6 +49,7 @@ On a VM built as in `../ubuntu-common/README.md`:
 cd homelab-vm/ubuntu-common
 sudo ./setup.sh
 sudo ./install-sysbox.sh
+sudo ./setup-swap.sh
 
 cd ../ubuntu-coder
 sed -e "s/^DOCKER_GID=.*/DOCKER_GID=$(getent group docker | cut -d: -f3)/" \
