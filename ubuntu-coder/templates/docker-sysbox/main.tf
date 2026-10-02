@@ -317,6 +317,11 @@ resource "docker_container" "workspace" {
   image = "codercom/enterprise-base:ubuntu"
   # Sysbox: required for Docker inside the workspace without --privileged.
   runtime = "sysbox-runc"
+  # Cap the workspace so a memory spike inside it gets OOM-killed inside the
+  # workspace, not on the whole VM (Coder, Postgres, dockerd). 6 GB of the
+  # VM's 8 GB, plus up to 3 GB of the VM's swap. In MB.
+  memory      = 6144
+  memory_swap = 9216
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace_owner.me.name}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$

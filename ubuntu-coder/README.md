@@ -36,7 +36,9 @@ Watch `free -m` and grow the VM if it swaps.
 added 2026-10-02 after two global OOM kills in one day: the workspace container
 had no memory limit and the VM had no swap, so a memory spike inside the
 workspace (several chrome-devtools-mcp copies plus Chromium) took the whole VM
-down to the OOM killer.
+down to the OOM killer. The template now also caps each workspace at 6 GB of
+RAM plus 3 GB of swap (`memory`/`memory_swap` in `main.tf`), so a spike is
+killed inside the workspace, and Coder, Postgres and dockerd keep running.
 
 **Disk:** each workspace's inner Docker keeps its images and layers in its own
 `coder-<id>-docker` volume. That is what fills the disk, not home dirs.
