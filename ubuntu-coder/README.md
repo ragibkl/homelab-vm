@@ -106,11 +106,23 @@ only works for accounts that already exist.
 
 The CLI inside the container is logged in as the admin after the step above:
 
+From inside a workspace, whose `coder` CLI is already logged in as you:
+
+```shell
+coder templates push docker-sysbox --directory templates/docker-sysbox --yes
+```
+
+Or on the VM, through the server container (its CLI needs a `coder login`
+first):
+
 ```shell
 docker compose cp templates/docker-sysbox coder:/tmp/docker-sysbox
 docker compose exec -T coder coder templates push docker-sysbox \
   --directory /tmp/docker-sysbox --yes
 ```
+
+A push doesn't touch running workspaces. They pick up the new version when
+you update or restart them.
 
 The startup script ends by running any executables in
 `~/.config/coder/startup.d/` (persistent home), so each user can start their
