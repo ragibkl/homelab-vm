@@ -4,6 +4,7 @@
 # sample.env). Pushes the result to Gatus (external endpoint
 # backup_coder-db), which alerts on a failure or when no push arrives.
 set -uo pipefail
+umask 077   # the dump holds secrets (keys, tokens)
 
 dir=/var/backups/coder-db
 start=$(date +%s)
@@ -28,7 +29,7 @@ fail() {
     exit 1
 }
 
-mkdir -p "$dir"
+mkdir -p -m 700 "$dir"
 db=$(docker compose -p ubuntu-coder ps -q database) && [ -n "$db" ] \
     || fail "database container not running"
 

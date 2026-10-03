@@ -154,6 +154,41 @@ apps and forwarded ports on their own subdomains, e.g. port 3000 of workspace
   `_acme-challenge.coder.vmbr1.ingress.ragib.dev` CNAMEd to its acme-dns
   registration.
 
+## Backup
+
+Coder's Postgres (users, templates, workspace records, the workspace SSH key
+the servers trust) is dumped nightly at 03:30 +08:00 and backed up with
+restic to Wasabi bucket `ragib-coder-backup` (versioned; IAM user
+`coder-backup` can't delete old versions). Kept: 14 daily, 8 weekly,
+12 monthly. Each run pushes to Gatus `backup_coder-db`, which alerts on
+Telegram on a failure or a missed night. Files in `backup/`.
+
+- **Install:** create `/etc/coder-backup/env` from `backup/sample.env`
+  (root, mode 600), then `cd backup && ./install.sh`.
+- **Run now:** `systemctl start coder-db-backup && journalctl -u coder-db-backup -n 30`.
+- **The restic password** is the only way to read the backups. Copies: the
+  user's password manager and `~/.config/wasabi/coder-backup.env` in the
+  workspace (same disk as this VM, so not enough on its own).
+- The last dump also stays at `/var/backups/coder-db/coder.dump`.
+
+**Restore** (as root):
+
+```sh
+set -a; . /etc/coder-backup/env; set +a
+restic snapshots --tag coder-db
+restic restore latest --tag coder-db --target /tmp/r
+cd /home/ragib/homelab-vm/ubuntu-coder
+docker compose stop coder
+docker compose exec database dropdb -U coder coder
+docker compose exec database createdb -U coder coder
+docker compose exec -T database pg_restore -U coder -d coder --no-owner \
+  < /tmp/r/var/backups/coder-db/coder.dump
+docker compose start coder
+```
+
+Restore tested 2026-10-03 into a throwaway `postgres:17` container: row
+counts matched the live database.
+
 ## Upgrading
 
 - **Coder:** bump `CODER_VERSION` in `.env` (stable channel:
