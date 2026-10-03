@@ -13,8 +13,9 @@ push() {  # push true|false [error]
     [ -n "${GATUS_PUSH_TOKEN:-}" ] || return 0
     local err base
     err=$(printf %s "${2:-}" | tr -c 'A-Za-z0-9._-' '+' | cut -c1-200)
+    # Only the node running Gatus answers; the others time out quietly.
     for base in ${GATUS_PUSH_URLS:-}; do
-        if curl -fsS -m 10 -o /dev/null -X POST \
+        if curl -fs -m 10 -o /dev/null -X POST \
             -H "Authorization: Bearer $GATUS_PUSH_TOKEN" \
             "$base/api/v1/endpoints/backup_coder-db/external?success=$1&error=$err&duration=$(( $(date +%s) - start ))s"; then
             return 0
