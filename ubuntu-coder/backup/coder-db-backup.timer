@@ -1,0 +1,10 @@
+[Unit]
+Description=Nightly Coder Postgres backup
+
+[Timer]
+OnCalendar=*-*-* 03:30 Asia/Kuala_Lumpur
+RandomizedDelaySec=10m
+Persistent=true
+
+[Install]
+WantedBy=timers.target
