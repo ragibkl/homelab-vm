@@ -260,6 +260,25 @@ resource "coder_app" "claude" {
   EOT
 }
 
+# The persistent Chromium (KasmVNC on :3000) that a user's own ~/browser
+# compose may run; Claude drives it over CDP and the user watches here.
+# Without that container the button just shows as unhealthy.
+resource "coder_app" "browser" {
+  count        = data.coder_workspace.me.start_count
+  agent_id     = coder_agent.main.id
+  slug         = "browser"
+  display_name = "Browser"
+  icon         = "/emojis/1f310.png"
+  url          = "http://localhost:3000"
+  subdomain    = true
+  share        = "owner"
+  healthcheck {
+    url       = "http://localhost:3000"
+    interval  = 15
+    threshold = 6
+  }
+}
+
 resource "docker_volume" "home_volume" {
   name = "coder-${data.coder_workspace.me.id}-home"
   # Protect the volume from being deleted due to changes in attributes.
