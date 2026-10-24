@@ -1,0 +1,22 @@
+#!/bin/bash
+# adbup: bring the test devices up. Starts the USB tunnel (adb-usb-tunnel) and
+# the Wi-Fi tunnel through the vmbr1 router, restores fixed-port Wi-Fi adb
+# (tcpip 5555) over USB after a device reboot, connects, and lists both.
+log=$HOME/.cache/adb-usb-tunnel.log
+setsid -f "$HOME/.local/bin/adb-usb-tunnel" >> "$log" 2>&1 < /dev/null
+if ! ss -ltn | grep -q '127.0.0.1:5555 '; then
+    ssh -o ConnectTimeout=8 -o BatchMode=yes -f -N \
+        -L 5555:10.15.0.146:5555 -L 5556:10.15.0.180:5555 root@10.15.1.1
+fi
+sleep 3
+for d in phone:10.15.0.146:5555 tablet:10.15.0.180:5556; do
+    IFS=: read -r name ip port <<< "$d"
+    if ! ssh -o BatchMode=yes -o ConnectTimeout=5 root@10.15.1.1 "nc -z -w2 $ip 5555" 2>/dev/null &&
+       [ "$(ADB_SERIAL=$name dadb get-state 2>/dev/null)" = device ]; then
+        echo "$name: Wi-Fi port 5555 closed, restoring it over USB"
+        ADB_SERIAL=$name dadb tcpip 5555; sleep 3
+    fi
+    adb connect 127.0.0.1:$port
+done
+echo "--- USB (Coder VM adb server)"; ADB_SERVER_SOCKET=tcp:127.0.0.1:5038 adb devices -l | tail -n +2
+echo "--- Wi-Fi (local adb server)"; adb devices -l | tail -n +2

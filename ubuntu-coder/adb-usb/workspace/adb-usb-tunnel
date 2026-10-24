@@ -1,0 +1,13 @@
+#!/bin/bash
+# Keep the tunnel to the Coder VM's adb server (USB test devices passed through
+# from Proxmox) up: workspace 127.0.0.1:5038 -> VM localhost:5037.
+# Reconnects after drops, one instance at a time. Log: ~/.cache/adb-usb-tunnel.log
+exec 9>"$HOME/.cache/adb-usb-tunnel.lock"
+flock -n 9 || { echo "adb-usb-tunnel: already running"; exit 0; }
+while true; do
+    echo "$(date -Is) connecting"
+    ssh -o BatchMode=yes -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 \
+        -N -L 127.0.0.1:5038:localhost:5037 10.15.1.31; rc=$?
+    echo "$(date -Is) ssh exited ($rc), retrying in 10s"
+    sleep 10
+done

@@ -1,0 +1,6 @@
+#!/bin/sh
+# Run by the Coder template's startup hook on workspace start.
+# Brings the test devices up (see ~/.local/bin/adbup): USB through the Coder
+# VM's adb server, Wi-Fi through the vmbr1 router (phone 127.0.0.1:5555,
+# tablet 127.0.0.1:5556). Tools reach either via ~/.local/bin/dadb.
+"$HOME/.local/bin/adbup" >> "$HOME/.cache/adb-devices.log" 2>&1 &

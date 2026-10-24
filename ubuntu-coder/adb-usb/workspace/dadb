@@ -1,0 +1,20 @@
+#!/bin/bash
+# dadb <adb args>: adb for the test devices, picking the transport.
+# ADB_SERIAL: phone (default) | tablet | any serial. The phone and tablet (also
+# when given as their Wi-Fi serials 127.0.0.1:5555/5556) go over USB through
+# the Coder VM's adb server when it sees them, otherwise over Wi-Fi.
+# ADB_USB=0 forces Wi-Fi. USB serials: PHONE_USB/TABLET_USB in ~/.config/test-devices.env.
+. "$HOME/.config/test-devices.env"
+usb_sock=tcp:127.0.0.1:5038   # 127.0.0.1, not localhost: adb won't start a stray local server
+s=${ADB_SERIAL:-phone}
+case $s in
+    phone|127.0.0.1:5555) usb=$PHONE_USB wifi=127.0.0.1:5555 ;;
+    tablet|127.0.0.1:5556) usb=$TABLET_USB wifi=127.0.0.1:5556 ;;
+    "$PHONE_USB"|"$TABLET_USB") exec env ADB_SERVER_SOCKET=$usb_sock adb -s "$s" "$@" ;;
+    *) exec adb -s "$s" "$@" ;;
+esac
+if [ "${ADB_USB:-1}" != 0 ] &&
+   [ "$(ADB_SERVER_SOCKET=$usb_sock adb -s $usb get-state 2>/dev/null)" = device ]; then
+    exec env ADB_SERVER_SOCKET=$usb_sock adb -s $usb "$@"
+fi
+exec adb -s $wifi "$@"

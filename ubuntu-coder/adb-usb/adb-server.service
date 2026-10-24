@@ -1,0 +1,16 @@
+[Unit]
+Description=adb server for USB test devices (passed through from Proxmox)
+After=network.target
+
+[Service]
+# Only on the VM's localhost: the workspace reaches it over ssh -L.
+# adb rejects an IP here ("listening on specified hostname currently
+# unsupported"), so it has to be `localhost`.
+User=ragib
+Group=plugdev
+ExecStart=/opt/platform-tools/adb -L tcp:localhost:5037 server nodaemon
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

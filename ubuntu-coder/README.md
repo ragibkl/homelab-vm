@@ -189,6 +189,39 @@ docker compose start coder
 Restore tested 2026-10-03 into a throwaway `postgres:17` container: row
 counts matched the live database.
 
+## Android test devices over USB
+
+The spare Android phone (realme RMX3941) and tablet (Redmi Pad SE) are
+plugged into the Proxmox host and passed through to this VM, so the
+workspace can drive them with adb over USB instead of Wi-Fi only. Set up
+2026-10-24. Files in `adb-usb/`.
+
+- **Proxmox:** passed through by physical port, not vendor:product, because
+  Android changes its USB product ID with the USB mode (charging, file
+  transfer):
+  `qm set 1031 -usb0 host=3-1 -usb1 host=3-2.2` (tablet on host port 3-1,
+  phone on 3-2.2 behind a hub). USB hotplugs into the running VM; no
+  restart. If a cable moves to another port, find it with `lsusb -t` on the
+  host and update `usb0`/`usb1`. Nothing changes on the network side.
+- **This VM:** `adb-usb/install.sh` (as root) installs platform-tools in
+  `/opt/platform-tools`, a udev rule giving group `plugdev` access to the
+  realme/OPPO (`22d9`) and Xiaomi (`2717`) devices, and `adb-server.service`
+  (adb server as `ragib`, VM localhost only). Its key is
+  `~ragib/.android/adbkey`: each device asks once to allow it ("Always
+  allow from this computer"). Keep platform-tools at the workspace's
+  version: an adb client restarts a server that doesn't match.
+- **Workspace:** copies of its scripts are in `adb-usb/workspace/`
+  (installed in `~/.local/bin/`, plus `~/.config/coder/startup.d/adb-devices`).
+  `adb-usb-tunnel` keeps `127.0.0.1:5038` forwarded to this VM's adb server;
+  `dadb` runs adb against the phone (default) or tablet
+  (`ADB_SERIAL=tablet`), over USB when this VM sees the device and over
+  Wi-Fi otherwise (USB serials in `~/.config/test-devices.env`, from
+  `sample-test-devices.env`; kept out of this public repo);
+  `adbup` starts both tunnels and restores fixed-port Wi-Fi adb
+  (`tcpip 5555`) over USB after a device reboot.
+- **Check:** `systemctl status adb-server`, `sudo -u ragib /opt/platform-tools/adb devices -l`.
+  From the workspace: `ADB_SERVER_SOCKET=tcp:127.0.0.1:5038 adb devices -l`.
+
 ## Upgrading
 
 - **Coder:** bump `CODER_VERSION` in `.env` (stable channel:
