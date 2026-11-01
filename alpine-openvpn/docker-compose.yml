@@ -21,3 +21,14 @@ services:
       - ./frpc/frpc.toml:/etc/frp/frpc.toml:ro
     restart: unless-stopped
     env_file: .env
+
+  # Tunnel to the new edge (frpc-edge.toml). Version matches frps there.
+  frpc-edge:
+    image: fatedier/frpc:v0.71.1
+    command: ["-c", "/etc/frp/frpc.toml"]
+    network_mode: host
+    volumes:
+      - ./frpc/frpc-edge.toml:/etc/frp/frpc.toml:ro
+      - ./frpc/tls:/etc/frp/tls:ro
+    restart: unless-stopped
+    env_file: .env

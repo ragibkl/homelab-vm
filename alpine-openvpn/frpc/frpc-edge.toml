@@ -1,0 +1,30 @@
+# Second tunnel, to the new edge (ragibkl/infra docs/design-edge-tunnel.md):
+# frps v0.71 with mutual TLS. Runs beside the old frpc until the old edge
+# is retired. Env from .env: FRP_EDGE_ADDR (edge IP), FRP_EDGE_SERVER_NAME
+# (name on the edge's certificate), FRP_EDGE_TOKEN. Certificates in
+# ./frpc/tls/ (gitignored; from infra secrets/edge.sops.yaml).
+serverAddr = "{{ .Envs.FRP_EDGE_ADDR }}"
+serverPort = 7000
+auth.method = "token"
+auth.token = "{{ .Envs.FRP_EDGE_TOKEN }}"
+loginFailExit = false
+
+transport.tls.enable = true
+transport.tls.serverName = "{{ .Envs.FRP_EDGE_SERVER_NAME }}"
+transport.tls.trustedCaFile = "/etc/frp/tls/ca.crt"
+transport.tls.certFile = "/etc/frp/tls/client.crt"
+transport.tls.keyFile = "/etc/frp/tls/client.key"
+
+[[proxies]]
+name = "openvpn-udp"
+type = "udp"
+localIP = "127.0.0.1"
+localPort = 1194
+remotePort = 1194
+
+[[proxies]]
+name = "openvpn-tcp"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 1194
+remotePort = 1194
