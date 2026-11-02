@@ -1,6 +1,5 @@
-# Second tunnel, to the new edge (ragibkl/infra docs/design-edge-tunnel.md):
-# frps v0.71 with mutual TLS. Runs beside the old frpc until the old edge
-# is retired. Env from .env: FRP_EDGE_ADDR (edge IP), FRP_EDGE_SERVER_NAME
+# Tunnel to the edge VPS (ragibkl/infra docs/design-edge-tunnel.md):
+# frps v0.71 with mutual TLS. Env from .env: FRP_EDGE_ADDR (edge IP), FRP_EDGE_SERVER_NAME
 # (name on the edge's certificate), FRP_EDGE_TOKEN. Certificates in
 # ./frpc/tls/ (gitignored; from infra secrets/edge.sops.yaml).
 serverAddr = "{{ .Envs.FRP_EDGE_ADDR }}"

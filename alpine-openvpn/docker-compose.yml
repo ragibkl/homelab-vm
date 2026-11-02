@@ -14,15 +14,7 @@ services:
       - /lib/modules:/lib/modules:ro
     privileged: true
 
-  frpc:
-    image: snowdreamtech/frpc:0.65
-    network_mode: host
-    volumes:
-      - ./frpc/frpc.toml:/etc/frp/frpc.toml:ro
-    restart: unless-stopped
-    env_file: .env
-
-  # Tunnel to the new edge (frpc-edge.toml). Version matches frps there.
+  # Tunnel to the edge VPS (frpc-edge.toml). Version matches frps there.
   frpc-edge:
     image: fatedier/frpc:v0.71.1
     command: ["-c", "/etc/frp/frpc.toml"]
