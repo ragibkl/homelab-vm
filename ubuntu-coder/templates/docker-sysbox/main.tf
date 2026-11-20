@@ -44,6 +44,15 @@ data "coder_provisioner" "me" {}
 data "coder_workspace" "me" {}
 data "coder_workspace_owner" "me" {}
 
+data "coder_parameter" "claude_remote_control" {
+  name         = "claude_remote_control"
+  display_name = "Claude Remote Control"
+  description  = "Keep `claude remote-control` running (tmux session claude-rc) so Claude in this workspace can be used from claude.ai/code and the Claude app. Sign in once with the Claude button first."
+  type         = "bool"
+  default      = "false"
+  mutable      = true
+}
+
 resource "coder_agent" "main" {
   arch           = data.coder_provisioner.me.arch
   os             = "linux"
@@ -88,6 +97,29 @@ resource "coder_agent" "main" {
         > ~/.config/mise/config.toml
     fi
     mise install --yes
+
+    # Optional (workspace setting "Claude Remote Control"): keep
+    # `claude remote-control` running in tmux session claude-rc, so this
+    # workspace's Claude can be used from claude.ai/code and the Claude app.
+    # Until Claude is installed and signed in (open the Claude button once,
+    # run /login, trust the folder), it waits and retries every minute.
+    if [ "${data.coder_parameter.claude_remote_control.value}" = "true" ]; then
+      mkdir -p ~/.local/bin
+      cat > ~/.local/bin/claude-rc-loop <<'RC'
+#!/bin/bash
+cd ~
+while true; do
+  if command -v claude >/dev/null && claude remote-control --name "$(hostname)"; then
+    sleep 5
+  else
+    echo "Remote Control not running yet: open Claude, run /login, trust the folder. Retrying in 60 s."
+    sleep 60
+  fi
+done
+RC
+      chmod +x ~/.local/bin/claude-rc-loop
+      tmux has-session -t claude-rc 2>/dev/null || tmux new-session -d -s claude-rc -c ~ "bash -lc ~/.local/bin/claude-rc-loop"
+    fi
 
     # Per-user startup hooks: executables in ~/.config/coder/startup.d run on
     # every start (e.g. a tunnel only one user's keys can open). Hooks must
