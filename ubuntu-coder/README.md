@@ -18,7 +18,7 @@ Self-hosted [Coder](https://coder.com/) on `vmbr1-ubuntu-coder` (Proxmox VM
 | Hostname | `vmbr1-ubuntu-coder` — keytree matches it against [server-keys](https://github.com/ragibkl/server-keys) (`vmbr1-*`), so the `vmbr1-` prefix matters |
 | VMID | `1031`, following the ID→IP pattern of the k3s VMs (`1021` → `.21`) |
 | IP | `10.15.1.31`, static via cloud-init (outside the dnsmasq DHCP range `.100–.200`) |
-| CPU / RAM / disk | 4 vCPU (type `host`), 8 GB (no ballooning), 100 GB on `local-lvm` |
+| CPU / RAM / disk | 4 vCPU (type `host`), 12 GB (no ballooning), 150 GB on `local-lvm` (2026-11-20: 8 → 12 GB, 100 → 150 GB for a second user) |
 
 **Why Ubuntu:** Sysbox has no Alpine package; it supports Ubuntu, Debian and
 Flatcar. Ubuntu 24.04 needs kernel 6.8+ and Sysbox 0.7.1+ (0.7.1 fixed Noble
@@ -37,7 +37,8 @@ added 2026-10-02 after two global OOM kills in one day: the workspace container
 had no memory limit and the VM had no swap, so a memory spike inside the
 workspace (several chrome-devtools-mcp copies plus Chromium) took the whole VM
 down to the OOM killer. The template now also caps each workspace at 6 GB of
-RAM plus 3 GB of swap (`memory`/`memory_swap` in `main.tf`), so a spike is
+RAM plus 3 GB of swap (`memory`/`memory_swap` in `main.tf`; since 2026-11-20
+the owner's workspace gets 6 GB and others 3.5 GB, each plus half again in swap), so a spike is
 killed inside the workspace, and Coder, Postgres and dockerd keep running.
 
 **Disk:** each workspace's inner Docker keeps its images and layers in its own

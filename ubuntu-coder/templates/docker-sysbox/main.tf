@@ -331,16 +331,22 @@ resource "docker_volume" "docker_volume" {
   }
 }
 
+locals {
+  workspace_memory_mb = data.coder_workspace_owner.me.name == "ragibkl" ? 6144 : 3584
+}
+
 resource "docker_container" "workspace" {
   count = data.coder_workspace.me.start_count
   image = "codercom/enterprise-base:ubuntu"
   # Sysbox: required for Docker inside the workspace without --privileged.
   runtime = "sysbox-runc"
-  # Cap the workspace so a memory spike inside it gets OOM-killed inside the
-  # workspace, not on the whole VM (Coder, Postgres, dockerd). 6 GB of the
-  # VM's 8 GB, plus up to 3 GB of the VM's swap. In MB.
-  memory      = 6144
-  memory_swap = 9216
+  # Cap each workspace so a memory spike inside it gets OOM-killed inside the
+  # workspace, not on the whole VM (Coder, Postgres, dockerd). The VM has
+  # 12 GB: the owner's workspace (several Claude sessions + the shared
+  # browser) gets 6 GB, anyone else's 3.5 GB; each may also use half its
+  # memory again in swap. In MB.
+  memory      = local.workspace_memory_mb
+  memory_swap = local.workspace_memory_mb * 3 / 2
   # Uses lower() to avoid Docker restriction on container names.
   name = "coder-${data.coder_workspace_owner.me.name}-${lower(data.coder_workspace.me.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
