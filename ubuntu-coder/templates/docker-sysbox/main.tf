@@ -101,24 +101,27 @@ resource "coder_agent" "main" {
     # Optional (workspace setting "Claude Remote Control"): keep
     # `claude remote-control` running in tmux session claude-rc, so this
     # workspace's Claude can be used from claude.ai/code and the Claude app.
-    # Until Claude is installed and signed in (open the Claude button once,
-    # run /login, trust the folder), it waits and retries every minute.
+    # Runs in ~/projects (asks once to trust it). Until Claude is installed
+    # and signed in (open the Claude button once, run /login), it retries.
     if [ "${data.coder_parameter.claude_remote_control.value}" = "true" ]; then
       mkdir -p ~/.local/bin
       cat > ~/.local/bin/claude-rc-loop <<'RC'
 #!/bin/bash
-cd ~
+# Not the home folder: Claude never saves trust for a home directory, so
+# it would ask again on every start.
+mkdir -p ~/projects && cd ~/projects
 while true; do
   if command -v claude >/dev/null && claude remote-control --name "$(hostname)"; then
     sleep 5
   else
-    echo "Remote Control not running yet: open Claude, run /login, trust the folder. Retrying in 60 s."
+    echo "Remote Control not running yet: open Claude, run /login. Retrying in 60 s."
     sleep 60
   fi
 done
 RC
       chmod +x ~/.local/bin/claude-rc-loop
-      tmux has-session -t claude-rc 2>/dev/null || tmux new-session -d -s claude-rc -c ~ "bash -lc ~/.local/bin/claude-rc-loop"
+      mkdir -p ~/projects
+      tmux has-session -t claude-rc 2>/dev/null || tmux new-session -d -s claude-rc -c ~/projects "bash -lc ~/.local/bin/claude-rc-loop"
     fi
 
     # Per-user startup hooks: executables in ~/.config/coder/startup.d run on
