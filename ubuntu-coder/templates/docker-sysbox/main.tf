@@ -111,7 +111,9 @@ resource "coder_agent" "main" {
 # it would ask again on every start.
 mkdir -p ~/projects && cd ~/projects
 while true; do
-  if command -v claude >/dev/null && claude remote-control --name "$(hostname)"; then
+  # Sessions run without permission prompts (owner's choice, 2026-11-20): the
+  # workspace is its own sysbox container with nothing else in reach.
+  if command -v claude >/dev/null && claude remote-control --name "$(hostname)" --permission-mode bypassPermissions; then
     sleep 5
   else
     echo "Remote Control not running yet: open Claude, run /login. Retrying in 60 s."
