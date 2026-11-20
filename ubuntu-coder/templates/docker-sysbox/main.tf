@@ -101,16 +101,30 @@ resource "coder_agent" "main" {
     # Optional (workspace setting "Claude Remote Control"): keep
     # `claude remote-control` running in tmux session claude-rc, so this
     # workspace's Claude can be used from claude.ai/code and the Claude app.
-    # Runs in ~/projects (asks once to trust it). Until Claude is installed
-    # and signed in (open the Claude button once, run /login), it retries.
+    # Runs in the home folder. Until Claude is installed and signed in (open
+    # the Claude button once, run /login), it retries every minute. Sessions
+    # here skip permission prompts: also written as the user's default
+    # (~/.claude/settings.json, only if it doesn't exist yet).
     if [ "${data.coder_parameter.claude_remote_control.value}" = "true" ]; then
       mkdir -p ~/.local/bin
       cat > ~/.local/bin/claude-rc-loop <<'RC'
 #!/bin/bash
-# Not the home folder: Claude never saves trust for a home directory, so
-# it would ask again on every start.
-mkdir -p ~/projects && cd ~/projects
+# Runs in the home folder, like the Claude button. `claude remote-control`
+# never saves trust for a home folder itself, so record it here first
+# (once ~/.claude.json exists, i.e. after the first sign-in); otherwise it
+# asks "Trust /home/coder?" on every start, with nobody there to answer.
+cd ~
 while true; do
+  [ -f ~/.claude.json ] && python3 - <<'PY'
+import json, os
+p = os.path.expanduser("~/.claude.json")
+j = json.load(open(p))
+proj = j.setdefault("projects", {}).setdefault(os.path.expanduser("~"), {})
+if not proj.get("hasTrustDialogAccepted"):
+    proj["hasTrustDialogAccepted"] = True
+    json.dump(j, open(p + ".tmp", "w"), indent=2)
+    os.replace(p + ".tmp", p)
+PY
   # Sessions run without permission prompts (owner's choice, 2026-11-20): the
   # workspace is its own sysbox container with nothing else in reach.
   if command -v claude >/dev/null && claude remote-control --name "$(hostname)" --permission-mode bypassPermissions; then
@@ -122,8 +136,9 @@ while true; do
 done
 RC
       chmod +x ~/.local/bin/claude-rc-loop
-      mkdir -p ~/projects
-      tmux has-session -t claude-rc 2>/dev/null || tmux new-session -d -s claude-rc -c ~/projects "bash -lc ~/.local/bin/claude-rc-loop"
+      mkdir -p ~/.claude
+      [ -f ~/.claude/settings.json ] || printf '%s\n' '{' '  "permissions": { "defaultMode": "bypassPermissions" },' '  "skipDangerousModePermissionPrompt": true' '}' > ~/.claude/settings.json
+      tmux has-session -t claude-rc 2>/dev/null || tmux new-session -d -s claude-rc -c ~ "bash -lc ~/.local/bin/claude-rc-loop"
     fi
 
     # Per-user startup hooks: executables in ~/.config/coder/startup.d run on
