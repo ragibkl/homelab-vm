@@ -64,6 +64,13 @@ recreate a key with the same ID and secret after a rebuild.
 | ------ | --- | ----------- | --------------- |
 | `cloud-bancuh-s3` (Nextcloud) | `nextcloud` | read, write | flux-deploy `nextcloud-secrets` (SOPS): `GARAGE_S3_KEY/SECRET` |
 | `cloud-bancuh-s3` | `offsite-sync` | read | `rclone-cron/.env` |
+| `pspclick-documents` (PSPClick uploads, encrypted by the app) | `pspclick` | read, write | flux-deploy `pspclick-storage` (SOPS) |
+| `pspclick-documents` | `offsite-sync` | read | `rclone-cron/.env` |
+
+PSPClick's offsite bucket `pspclick-documents` (Wasabi, versioned) has its own
+IAM user `pspclick-offsite`, used through the `wasabipsp` rclone remote. The
+files are encrypted by the app before they reach Garage, so neither copy can
+be read without the app's key (kept in flux-deploy).
 
 The bucket name must stay `cloud-bancuh-s3`: Nextcloud's storage id
 (`object::store:amazon::cloud-bancuh-s3`) contains it.

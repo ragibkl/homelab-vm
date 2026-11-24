@@ -8,8 +8,10 @@ set -u
 mode=${1:-}
 case $mode in copy|sync) ;; *) echo "usage: $0 copy|sync" >&2; exit 2 ;; esac
 
-# garage bucket : wasabi bucket
-BUCKETS="cloud-bancuh-s3:cloud-bancuh-s3"
+# garage bucket : wasabi bucket [: rclone remote, default "wasabi"]
+# Each app's offsite bucket has its own bucket-scoped Wasabi IAM user, so a
+# bucket with a different key gets its own remote (RCLONE_CONFIG_<NAME>_* in .env).
+BUCKETS="cloud-bancuh-s3:cloud-bancuh-s3 pspclick-documents:pspclick-documents:wasabipsp"
 
 # GATUS_PUSH_URLS: base URLs to try in turn (the gatus-push NodePort on each
 # k3s node; only the node running Gatus answers). GATUS_PUSH_TOKEN: bearer.
@@ -32,11 +34,13 @@ flock -n 9 || { echo "offsite-sync: another run is in progress" >&2; exit 0; }
 start=$(date +%s)
 failed=""
 for pair in $BUCKETS; do
-    src=${pair%%:*}; dst=${pair#*:}
-    echo "offsite-sync: $mode garage:$src -> wasabi:$dst"
+    src=${pair%%:*}; rest=${pair#*:}
+    dst=${rest%%:*}; remote=wasabi
+    [ "$rest" != "$dst" ] && remote=${rest#*:}
+    echo "offsite-sync: $mode garage:$src -> $remote:$dst"
     # --max-delete: a sync from a wrongly empty source would otherwise
     # delete the whole offsite copy.
-    rclone "$mode" "garage:$src" "wasabi:$dst" \
+    rclone "$mode" "garage:$src" "$remote:$dst" \
         --fast-list --transfers 16 --checkers 32 \
         --max-delete 2000 \
         --stats 5m --stats-one-line --log-level INFO \
