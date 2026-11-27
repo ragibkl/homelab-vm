@@ -4,7 +4,7 @@
 # root, not on the VM itself.
 #
 #   ./migrate-to-keytree.sh 10.15.1.21
-#   ./migrate-to-keytree.sh 10.15.2.11 -J 10.15.1.1,10.15.0.196
+#   ./migrate-to-keytree.sh 10.15.0.254 -J 10.15.1.1
 #   ./migrate-to-keytree.sh root@vmbr1.ingress.ragib.dev -i ~/.ssh/id_ed25519
 #
 # Steps, stopping at the first problem:

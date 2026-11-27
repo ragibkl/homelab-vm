@@ -39,3 +39,7 @@ Decommissioned 2026-09-27 (VM 231 powered off, start-at-boot off; see
 `shared/`, including `media/`) is still attached and intact.
 
 - [ ] Decide what to keep from `/mnt/sdb1/shared`, then delete the VM and disk
+
+Note 2026-11-27: vmbr2 (its k3s cluster, OpenVPN, router VM 2001, the pve
+bridge) and the old `alpine-frps` setup are gone; see ragibkl/infra
+docs/plan-merge-vmbr2.md. The ticked vmbr2 items above are history.

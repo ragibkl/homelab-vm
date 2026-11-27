@@ -45,7 +45,7 @@ that can already SSH in:
 
 ```shell
 ./migrate-to-keytree.sh 10.15.1.21
-./migrate-to-keytree.sh 10.15.2.11 -J 10.15.1.1,10.15.0.196   # vmbr2, via both routers
+./migrate-to-keytree.sh 10.15.0.254 -J 10.15.1.1                # vmbr0, via the vmbr1 router
 ```
 
 It keeps a spare SSH connection open while it changes sshd, tests a fresh
