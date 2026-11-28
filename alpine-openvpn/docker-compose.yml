@@ -16,7 +16,7 @@ services:
 
   # Tunnel to the edge VPS (frpc-edge.toml). Version matches frps there.
   frpc-edge:
-    image: fatedier/frpc:v0.71.1
+    image: fatedier/frpc:v0.72.0
     command: ["-c", "/etc/frp/frpc.toml"]
     network_mode: host
     volumes:
